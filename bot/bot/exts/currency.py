@@ -19,7 +19,8 @@ class Currency(Cog):
 
         if player.bot:
             return await ctx.respond(
-                "Bots can't play D: ||(01110011 01101111 01110010 01110010 01111001)||"
+                "Bots can't play D: ||(01110011 01101111 01110010 01110010 01111001)||",
+                ephemeral=True
             )
 
         # Placeholders until i add a database :)

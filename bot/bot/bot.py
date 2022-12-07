@@ -13,3 +13,9 @@ class _Bot(Bot):
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         async with aiohttp.ClientSession() as self.session:
             return await super().start(token, reconnect=reconnect)
+    
+    async def on_ready(self) -> None:
+        await self.setup_database()
+
+    async def setup_database(self) -> None:
+        pass
