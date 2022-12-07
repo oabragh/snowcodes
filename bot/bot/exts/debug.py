@@ -9,9 +9,9 @@ class Debug(Cog):
         self.bot = bot
 
     @slash_command(name="ping", guild_ids=[1041363391790465075])
-    async def ping(self, inter: ApplicationContext):
+    async def ping(self, ctx: ApplicationContext):
         """Show the bot's latency"""
-        await inter.respond(f"Pong `{round(self.bot.latency * 1000)}ms`")
+        await ctx.respond(f"Pong `{round(self.bot.latency * 1000)}ms`")
 
 
 def setup(bot: _Bot):

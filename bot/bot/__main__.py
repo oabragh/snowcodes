@@ -14,8 +14,11 @@ def main():
 
     bot = _Bot()
 
-    exts = ["bot.exts."+i.replace(".py", "")
-            for i in listdir("./bot/exts") if i.endswith(".py")]
+    exts = [
+        "bot.exts." + i.replace(".py", "")
+        for i in listdir("./bot/exts")
+        if i.endswith(".py")
+    ]
 
     for i in exts:
         bot.load_extension(i)
