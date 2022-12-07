@@ -1,1 +1,1 @@
-nextcord
+py-cord

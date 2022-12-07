@@ -5,7 +5,7 @@ Copyright (c) 2022 oabragh
 """
 
 from bot.bot import _Bot
-from os import getenv
+from os import getenv, listdir
 
 
 def main():
@@ -13,7 +13,11 @@ def main():
 
     bot = _Bot()
 
-    bot.load_extensions_from_module("bot.exts")
+    exts = ["bot.exts."+i.replace(".py", "")
+                        for i in listdir("./bot/exts") if i.endswith(".py")]
+
+    for i in exts:
+        bot.load_extension(i)
 
     bot.run(getenv("DISCORD_TOKEN"))
 

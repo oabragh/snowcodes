@@ -1,6 +1,6 @@
 """commands.Bot subclass file"""
 
-from nextcord.ext.commands import Bot
+from discord import Bot
 import aiohttp
 
 class _Bot(Bot):
