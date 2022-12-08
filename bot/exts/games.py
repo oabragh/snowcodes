@@ -21,7 +21,6 @@ class AmongieButton(Button):
             self.disabled = True
             self.view.score += 1
 
-            await interaction.
             await interaction.message.edit("Click on crewmates (if you pick an impostor you lose...)\n"
                                            f"Current score: {self.view.score}", view=self.view)
 

@@ -9,6 +9,7 @@ from bot.constants import emojis
 class Currency(Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.helper = self.bot.dbh
 
     @slash_command(name="balance", guild_ids=[1041363391790465075])
     @option("player", Member)
@@ -23,23 +24,26 @@ class Currency(Cog):
                 ephemeral=True,
             )
 
-        player_wallet = 0
-        player_vault = 0
+        data = await self.helper.get_user_balance(player.id)
 
-        desc = (
-            f"> Wallet: {player_wallet} {emojis['currency']}\n"
-            f"> Vault: {player_vault} {emojis['currency']}"
+        player_wallet = data[1]
+        player_vault = data[2]
+        player_max_vault = data[3]
+
+        balance_embed = Embed(
+            title=f"{player.display_name}'s Balance:",
+            colour=Colour.blue(),
+            description=(
+                f"> Wallet: {player_wallet} {emojis['currency']}\n"
+                f"> Vault: {player_vault}/{player_max_vault} {emojis['currency']}"
+            )
         )
 
-        bal_embed = Embed(
-            title=f"{player.display_name}'s Balance:", description=desc, colour=0x2F3136
-        )
-
-        await ctx.respond(embed=bal_embed)
+        await ctx.respond(embed=balance_embed)
 
     @slash_command(name="pay", guild_ids=[1041363391790465075])
     @option("player", Member, description="Your best friend's name :)")
-    @option("amount", int, description="Amount of candies to send!")
+    @option("amount", int, description="Amount of coins to send!")
     async def pay_cmd(self, ctx: ApplicationContext, player: Member, amount: int):
         """Send money from your wallet!"""
 
@@ -52,8 +56,16 @@ class Currency(Cog):
                 ephemeral=True,
             )
 
-        target_wallet = 0
-        your_wallet = 0
+        your_bal = await self.helper.get_user_balance(ctx.author.id)
+
+        if your_bal[1] < amount:
+            return await ctx.respond(
+                "Whoops! you don't have that amount.",
+                ephemeral=True,
+            )
+
+        _, your_wallet, _, _ = await self.helper.update_user_wallet(ctx.author.id, -amount)
+        _, target_wallet, _, _ = await self.helper.update_user_wallet(player.id, amount)
 
         transaction_embed = Embed(
             title="Successfully sent!",
