@@ -12,3 +12,6 @@ I planned a few commands & random events for the bot.
 
 # Day 3:
 It's 10am and i learned about [docker compose](https://www.youtube.com/watch?v=HG6yIjZapSA), i started setting up the project :D
+I added a few placeholders for `/pay` `/balance`and `/among-us` (no backend haha)
+
+Tomorrow i'm setting up the database!
