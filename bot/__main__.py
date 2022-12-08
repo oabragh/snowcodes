@@ -20,6 +20,8 @@ def main():
         if i.endswith(".py")
     ]
 
+    exts.append("bot.exts.amongus.command")
+
     for i in exts:
         bot.load_extension(i)
 
