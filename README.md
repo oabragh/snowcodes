@@ -15,3 +15,9 @@ It's 10am and i learned about [docker compose](https://www.youtube.com/watch?v=H
 I added a few placeholders for `/pay` `/balance`and `/among-us` (no backend haha)
 
 Tomorrow i'm setting up the database!
+
+# Day 4:
+I learnt a few stuff such as `random.shuffle()` and how to use views :), then i made a backend for `/pay` and `/balance`
+And i spent a few hours (4h actually) to make among-us working..
+
+Tomorrow i'll make `/bigrat` command and other economy commands!
