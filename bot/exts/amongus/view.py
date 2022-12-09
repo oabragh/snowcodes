@@ -7,7 +7,7 @@ from bot.constants import emojis
 class Amongus(View):
 
     _score = 0
-    _win_bonus = 0  # you get this when you when, default to 0
+    _win_bonus = 0  # you get this when you win, default to 0
 
     def __init__(self, *, player: User, bot, impostors: int):
         super().__init__(timeout=30, disable_on_timeout=True)

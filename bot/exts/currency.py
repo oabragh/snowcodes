@@ -64,9 +64,7 @@ class Currency(Cog):
                 ephemeral=True,
             )
 
-        _, your_wallet, _, _ = await self.helper.update_user_wallet(
-            ctx.author.id, -amount
-        )
+        _, your_wallet, _, _ = await self.helper.update_user_wallet(ctx.author.id, -amount)
         _, target_wallet, _, _ = await self.helper.update_user_wallet(player.id, amount)
 
         transaction_embed = Embed(

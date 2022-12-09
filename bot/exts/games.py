@@ -1,14 +1,15 @@
 from random import shuffle
 
-from discord import option, slash_command, ApplicationContext, Embed, Colour
+from discord import ApplicationContext, Colour, Embed, option, slash_command
 from discord.ext.commands import Cog
 
 from bot.bot import _Bot
+# among-us components
 from bot.exts.amongus.button import AmongieButton
 from bot.exts.amongus.view import Amongus
-
-from bot.exts.bigrat.view import Bigrat
+# bigrat components
 from bot.exts.bigrat.button import BoxButton
+from bot.exts.bigrat.view import Bigrat
 
 
 class Games(Cog):
