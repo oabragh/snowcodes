@@ -15,10 +15,8 @@ class Amongus(View):
         self.helper = bot.dbh
         self.player = player
         self.impostors = impostors
-        self.msg = (
-            "Click on crewmates (if you pick an impostor you lose...)\n"
-            f"Current score: {self.score} ({self.reward} {emojis['currency']})"
-        )
+        self.msg = ("Click on crewmates (if you pick an impostor you lose...)\n"
+                    f"Current score: {self.score} ({self.reward} {emojis['currency']})")
 
     async def lost(self):
         """Called when pressing an impostor button"""
@@ -45,9 +43,7 @@ class Amongus(View):
 
             win_embed = Embed(title="You won!", colour=Colour.green())
             win_embed.add_field(name="Score", value=self.score)
-            win_embed.add_field(
-                name="Reward", value=f"{self.reward} {emojis['currency']}"
-            )
+            win_embed.add_field(name="Reward", value=f"{self.reward} {emojis['currency']}")
 
             return await self.message.edit(content=None, embed=win_embed, view=None)
 
@@ -63,10 +59,8 @@ class Amongus(View):
         """update the score state"""
 
         self._score += 1
-        self.msg = (
-            "Click on crewmates (if you pick an impostor you lose...)\n"
-            f"Current score: {num} ({self.reward} {emojis['currency']})"
-        )
+        self.msg = ("Click on crewmates (if you pick an impostor you lose...)\n"
+                    f"Current score: {num} ({self.reward} {emojis['currency']})")
 
     @property
     def reward(self) -> int:
