@@ -1,15 +1,16 @@
-from discord.ui import View, Item
-from discord import Embed, Colour, User
+from discord import Colour, Embed, User
+from discord.ui import View
 
 from bot.constants import emojis
+
 
 class Amongus(View):
 
     _score = 0
-    _win_bonus = 0 # you get this when you win, default to 0
+    _win_bonus = 0  # you get this when you win, default to 0
 
-    def __init__(self, player: User, impostors: int, bot, *items: Item):
-        super().__init__(*items, timeout=30, disable_on_timeout=True)
+    def __init__(self, *, player: User, bot, impostors: int):
+        super().__init__(timeout=30, disable_on_timeout=True)
 
         self.helper = bot.dbh
         self.player = player
@@ -35,7 +36,7 @@ class Amongus(View):
         """Update the message with the current score"""
         self.score += 1
 
-        if self.score == 10-self.impostors:  # If every crewmate button is clicked
+        if self.score == 10 - self.impostors:  # If every crewmate button is clicked
             self._win_bonus = 50000
 
             await self.helper.update_user_wallet(self.player.id, self.reward)

@@ -1,4 +1,6 @@
 class DBHelpers:
+    """Helper functions for querying the database"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -29,12 +31,10 @@ class DBHelpers:
         """Update player wallet"""
         async with self.bot.conn.cursor() as cur:
             id, wallet, vault, max = await self.get_user_balance(id)
-            print("user id ",id," has ",wallet)
             query = "UPDATE balances SET wallet=? WHERE id=?"
-
             wallet += increment
-            await cur.execute(query, (wallet, id))
 
+            await cur.execute(query, (wallet, id))
             await self.bot.conn.commit()
 
         return (id, wallet, vault, max)

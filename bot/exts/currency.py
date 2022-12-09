@@ -36,7 +36,7 @@ class Currency(Cog):
             description=(
                 f"> Wallet: {player_wallet} {emojis['currency']}\n"
                 f"> Vault: {player_vault}/{player_max_vault} {emojis['currency']}"
-            )
+            ),
         )
 
         await ctx.respond(embed=balance_embed)
