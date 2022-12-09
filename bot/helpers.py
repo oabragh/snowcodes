@@ -4,7 +4,7 @@ class DBHelpers:
     def __init__(self, bot):
         self.bot = bot
 
-    async def create_user(self, id: int, wallet: int = 1000):
+    async def create_user(self, id: int, wallet: int = 0):
         """Add player to database"""
         async with self.bot.conn.cursor() as cur:
             query = "INSERT INTO balances (id, wallet) VALUES (?, ?)"

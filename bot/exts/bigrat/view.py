@@ -13,13 +13,13 @@ class Bigrat(View):
         self.helper = bot.dbh
         self.player = player
 
-        self.bigrat_img = File("bot/assets/bigrat.png")
-        self.hat_bigrat_img = File("bot/assets/bigrat-christmas-hat.png")
 
     async def lost(self):
         """Called when the player chose the wrong button"""
 
         chance = randint(1, 5)
+
+        bigrat_img = File("bot/assets/bigrat.png")
 
         lose_embed = Embed(title="You lost!", colour=Colour.red())
         lose_embed.set_image(url="attachment://bigrat.png")
@@ -33,7 +33,7 @@ class Bigrat(View):
         self.disable_all_items()
         self.stop()
 
-        await self.message.edit(embed=lose_embed, view=self)
+        await self.message.edit(embed=lose_embed, view=self, file=bigrat_img)
 
     async def won(self):
         """Called when the player clicks the right button"""
@@ -41,6 +41,8 @@ class Bigrat(View):
         reward_msg = f"You got {reward} {emojis['currency']} from bigrat!"
 
         await self.helper.update_user_wallet(self.player.id, reward)
+
+        hat_bigrat_img = File("bot/assets/bigrat-christmas-hat.png")
 
         win_embed = Embed(
             title="You won!", colour=Colour.green(), description=reward_msg
@@ -51,5 +53,5 @@ class Bigrat(View):
         self.stop()
 
         return await self.message.edit(
-            embed=win_embed, view=self, file=self.hat_bigrat_img
+            embed=win_embed, view=self, file=hat_bigrat_img
         )

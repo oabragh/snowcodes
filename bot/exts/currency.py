@@ -1,4 +1,4 @@
-from discord import ApplicationContext, slash_command, Member, Embed, option, Colour
+from discord import ApplicationContext, command, Member, Embed, option, Colour
 from discord.ext.commands import Cog
 
 from bot.bot import _Bot
@@ -11,7 +11,7 @@ class Currency(Cog):
         self.bot = bot
         self.helper = self.bot.dbh
 
-    @slash_command(name="balance", guild_ids=[1041363391790465075])
+    @command(name="balance", guild_ids=[1041363391790465075])
     @option("player", Member)
     async def balance_cmd(self, ctx: ApplicationContext, player: Member = None):
         """Show your or someone else's balance."""
@@ -41,7 +41,7 @@ class Currency(Cog):
 
         await ctx.respond(embed=balance_embed)
 
-    @slash_command(name="pay", guild_ids=[1041363391790465075])
+    @command(name="pay", guild_ids=[1041363391790465075])
     @option("player", Member, description="Your best friend's name :)")
     @option("amount", int, description="Amount of coins to send!")
     async def pay_cmd(self, ctx: ApplicationContext, player: Member, amount: int):

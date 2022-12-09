@@ -4,7 +4,7 @@ from discord.ui import Button
 
 class AmongieButton(Button):
     def __init__(self, impostor=False):
-        super().__init__(style=ButtonStyle.gray, emoji="🙍‍♂️")
+        super().__init__(style=ButtonStyle.gray)
 
         self.impostor = impostor
 

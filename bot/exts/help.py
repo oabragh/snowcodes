@@ -1,4 +1,4 @@
-from discord import ApplicationContext, slash_command, Embed
+from discord import ApplicationContext, command, Embed
 from discord.ext.commands import Cog
 
 from bot.bot import _Bot
@@ -8,7 +8,7 @@ class Help(Cog):
     def __init__(self, bot: _Bot):
         self.bot = bot
 
-    @slash_command(name="help", guild_ids=[1041363391790465075])
+    @command(name="help", guild_ids=[1041363391790465075])
     async def help_cmd(self, ctx: ApplicationContext):
         desc = (
             "`/balance` Check your balance!\n"
