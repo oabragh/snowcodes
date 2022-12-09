@@ -1,30 +1,14 @@
-from discord import ApplicationContext, slash_command, option, ButtonStyle, Interaction
-from discord.ui import View, Button
+from random import shuffle
+
+from discord import option, slash_command, ApplicationContext, Embed, Colour
 from discord.ext.commands import Cog
 
 from bot.bot import _Bot
-from random import randint
+from bot.exts.amongus.button import AmongieButton
+from bot.exts.amongus.view import Amongus
 
-
-class AmongieButton(Button):
-    def __init__(self, impostor=False):
-        super().__init__(style=ButtonStyle.gray, emoji="🙍‍♂️")
-
-        self.impostor = impostor
-
-    async def callback(self, interaction: Interaction):
-        if self.impostor:
-            await interaction.message.edit(content="You lost!", view=None)
-
-        else:
-            self.style = ButtonStyle.success
-            self.disabled = True
-            self.view.score += 1
-
-            await interaction.message.edit("Click on crewmates (if you pick an impostor you lose...)\n"
-                                           f"Current score: {self.view.score}", view=self.view)
-
-        return await super().callback(interaction)
+from bot.exts.bigrat.view import Bigrat
+from bot.exts.bigrat.button import BoxButton
 
 
 class Games(Cog):
@@ -35,33 +19,44 @@ class Games(Cog):
     @option(
         "impostors",
         description="Higher is harder but you get more rewards",
-        choices=["3", "4", "5"],
+        choices=["2", "3", "4", "5"],
     )
-    async def amogus_cmd(self, ctx: ApplicationContext, impostors: int):
+    async def amongus_cmd(self, ctx: ApplicationContext, impostors: int):
+        """Among us mini-game :D"""
 
-        view = View(timeout=30, disable_on_timeout=True)
-        view.score = 0
+        view = Amongus(player=ctx.author, bot=self.bot, impostors=impostors)
 
-        buttons = [AmongieButton() for _ in range(10)]
-        impostor_ids = []
+        impostor_btns = [AmongieButton(True) for _ in range(impostors)]
+        crewmate_btns = [AmongieButton() for _ in range(10 - impostors)]
+        buttons = crewmate_btns + impostor_btns
 
-        for _ in range(impostors):
-            rand = randint(0, 9)
-
-            while rand in impostor_ids:
-                rand = randint(0, 9)
-
-            impostor_ids.append(rand)
-            print(rand)
-            buttons[rand].impostor = True
+        shuffle(buttons)  # Randomize impostor buttons index
 
         for i in buttons:
-            print(i.impostor)
             view.add_item(i)
 
-        await ctx.respond(
-            "Click on crewmates (if you pick an impostor you lose...)\n"
-            f"Current score: {view.score}", view=view)
+        await ctx.respond(view.msg, view=view)
+
+    @slash_command(name="bigrat", guild_ids=[1041363391790465075])
+    async def bigrat_cmd(self, ctx: ApplicationContext):
+        """Play with bigrat"""
+
+        view = Bigrat(player=ctx.author, bot=self.bot)
+
+        buttons = [BoxButton() for _ in range(3)]
+        buttons.append(BoxButton(True))
+
+        shuffle(buttons)
+
+        for i in buttons:
+            view.add_item(i)
+
+        bigrat_embed = Embed(title="Guess what box contains bigrat's hat :thinking:",
+                             color=Colour.blurple())
+
+        bigrat_embed.set_image(url="attachment://bigrat.png")
+
+        await ctx.respond(embed=bigrat_embed, view=view, file=view.bigrat_img)
 
 
 def setup(bot: _Bot):

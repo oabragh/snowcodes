@@ -36,7 +36,7 @@ class Currency(Cog):
             description=(
                 f"> Wallet: {player_wallet} {emojis['currency']}\n"
                 f"> Vault: {player_vault}/{player_max_vault} {emojis['currency']}"
-            )
+            ),
         )
 
         await ctx.respond(embed=balance_embed)
@@ -64,7 +64,9 @@ class Currency(Cog):
                 ephemeral=True,
             )
 
-        _, your_wallet, _, _ = await self.helper.update_user_wallet(ctx.author.id, -amount)
+        _, your_wallet, _, _ = await self.helper.update_user_wallet(
+            ctx.author.id, -amount
+        )
         _, target_wallet, _, _ = await self.helper.update_user_wallet(player.id, amount)
 
         transaction_embed = Embed(

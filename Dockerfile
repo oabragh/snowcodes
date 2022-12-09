@@ -1,6 +1,8 @@
 FROM python:3.10-alpine
 
-ENV DISCORD_TOKEN=<token_here>
+ARG token
+
+ENV DISCORD_TOKEN=$token
 
 WORKDIR /bot
 
