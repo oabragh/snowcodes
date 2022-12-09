@@ -1,15 +1,16 @@
 from random import shuffle
 
-from discord import ApplicationContext, Colour, Embed, option, slash_command
+from discord import (ApplicationContext, Colour, Embed, Member, option,
+                     slash_command)
 from discord.ext.commands import Cog
 
 from bot.bot import _Bot
-# among-us components
 from bot.exts.amongus.button import AmongieButton
 from bot.exts.amongus.view import Amongus
-# bigrat components
 from bot.exts.bigrat.button import BoxButton
 from bot.exts.bigrat.view import Bigrat
+from bot.exts.tictactoe.button import TicTacToeButton
+from bot.exts.tictactoe.view import TicTacToe
 
 
 class Games(Cog):
@@ -58,6 +59,19 @@ class Games(Cog):
         bigrat_embed.set_image(url="attachment://bigrat.png")
 
         await ctx.respond(embed=bigrat_embed, view=view, file=view.bigrat_img)
+
+    @slash_command(name="tictactoe", guild_ids=[1041363391790465075])
+    @option("friend", Member)
+    async def tictactoe_cmd(self, ctx: ApplicationContext, friend: Member):
+        """Play tictactoe with a friend"""
+
+        view = TicTacToe(players=[ctx.author, friend], bot=self.bot)
+
+        for x in range(3):
+            for y in range(3):
+                view.add_item(TicTacToeButton(x, y))
+
+        await ctx.respond("test", view=view)
 
 
 def setup(bot: _Bot):
