@@ -1,10 +1,12 @@
-class DBHelpers:
+from discord import Cog
+
+class Database(Cog):
     """Helper functions for querying the database"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    async def create_user(self, id: int, wallet: int = 0):
+    async def create_user_wallet(self, id: int, wallet: int = 0):
         """Add player to database"""
         async with self.bot.conn.cursor() as cur:
             query = "INSERT INTO balances (id, wallet) VALUES (?, ?)"
@@ -21,9 +23,7 @@ class DBHelpers:
             result = await cur.fetchone()
 
             if not result:
-                result = await self.create_user(id)
-
-            await self.bot.conn.commit()
+                result = await self.create_user_wallet(id)
 
         return result
 
@@ -38,3 +38,35 @@ class DBHelpers:
             await self.bot.conn.commit()
 
         return (id, wallet, vault, max)
+    
+
+    async def create_user_inventory(self, id: int, item = None):
+        async with self.bot.conn.cursor() as cur:
+            query = "INSERT INTO inventory (id) VALUES (?)"
+            await cur.execute(query, (id,))
+            await self.bot.conn.commit()
+        
+        return (id,)
+
+    async def get_user_inventory(self, id: int):
+        """Returns the user items"""
+        async with self.bot.conn.cursor() as cur:
+            query = "SELECT * FROM inventory WHERE id=?"
+            await cur.execute(query, (id,))
+            result = await cur.fetchone()
+
+            if not result:
+                result = await self.create_user_inventory(id)
+
+            await self.bot.conn.commit()
+
+        return result
+
+    
+    async def update_user_item(self, user_id: int, item, ):
+        """Adds an item to user"""
+        async with self.bot.conn.cursor as cur:
+            await add_user(user_id)
+
+def setup(bot):
+    bot.add_cog(Database(bot))

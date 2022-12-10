@@ -1,5 +1,4 @@
-from discord import ApplicationContext, command, Embed
-from discord.ext.commands import Cog
+from discord import ApplicationContext, command, Embed, Cog
 
 from bot.bot import _Bot
 

@@ -1,5 +1,4 @@
-from discord import ApplicationContext, command, Member, Embed, option, Colour
-from discord.ext.commands import Cog
+from discord import ApplicationContext, command, Member, Embed, option, Colour, Cog
 
 from bot.bot import _Bot
 
@@ -9,7 +8,6 @@ from bot.constants import emojis
 class Currency(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.helper = self.bot.dbh
 
     @command(name="balance", guild_ids=[1041363391790465075])
     @option("player", Member)
@@ -24,7 +22,7 @@ class Currency(Cog):
                 ephemeral=True,
             )
 
-        data = await self.helper.get_user_balance(player.id)
+        data = await self.bot.db.get_user_balance(player.id)
 
         player_wallet = data[1]
         player_vault = data[2]
@@ -56,7 +54,7 @@ class Currency(Cog):
                 ephemeral=True,
             )
 
-        your_bal = await self.helper.get_user_balance(ctx.author.id)
+        your_bal = await self.bot.db.get_user_balance(ctx.author.id)
 
         if your_bal[1] < amount:
             return await ctx.respond(
@@ -64,8 +62,8 @@ class Currency(Cog):
                 ephemeral=True,
             )
 
-        _, your_wallet, _, _ = await self.helper.update_user_wallet(ctx.author.id, -amount)
-        _, target_wallet, _, _ = await self.helper.update_user_wallet(player.id, amount)
+        _, your_wallet, _, _ = await self.bot.db.update_user_wallet(ctx.author.id, -amount)
+        _, target_wallet, _, _ = await self.bot.db.update_user_wallet(player.id, amount)
 
         transaction_embed = Embed(
             title="Successfully sent!",

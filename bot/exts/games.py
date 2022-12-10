@@ -1,9 +1,7 @@
 from random import shuffle, choice
 
-from discord import (ApplicationContext, Colour, Embed, File, option,
+from discord import (ApplicationContext, Colour, Embed, File, Cog, option,
                      command)
-from discord.ext.commands import Cog
-from time import time
 from bot.bot import _Bot
 from bot.constants import emojis
 from bot.exts.amongus.button import AmongieButton
@@ -52,8 +50,7 @@ class Games(Cog):
 
     @command(name="bigrat", guild_ids=[1041363391790465075])
     async def bigrat_cmd(self, ctx: ApplicationContext):
-        """Play with bigrat"""
-        await ctx.defer()
+        """Play with bigrat :D"""
         view = Bigrat(player=ctx.author, bot=self.bot)
 
         buttons = [BoxButton() for _ in range(3)]
