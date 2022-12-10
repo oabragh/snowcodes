@@ -21,7 +21,7 @@ class Bigrat(View):
 
         bigrat_img = File("bot/assets/bigrat.png")
 
-        lose_embed = Embed(title="You lost!", colour=Colour.red())
+        lose_embed = Embed(title="You lost!")
         lose_embed.set_image(url="attachment://bigrat.png")
 
         if chance == 3:
@@ -44,14 +44,10 @@ class Bigrat(View):
 
         hat_bigrat_img = File("bot/assets/bigrat-christmas-hat.png")
 
-        win_embed = Embed(
-            title="You won!", colour=Colour.green(), description=reward_msg
-        )
+        win_embed = Embed(title="You won!", description=reward_msg)
         win_embed.set_image(url="attachment://bigrat-christmas-hat.png")
 
         self.disable_all_items()
         self.stop()
 
-        return await self.message.edit(
-            embed=win_embed, view=self, file=hat_bigrat_img
-        )
+        return await self.message.edit(embed=win_embed, view=self, file=hat_bigrat_img)

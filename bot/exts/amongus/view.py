@@ -1,4 +1,4 @@
-from discord import Colour, Embed, User
+from discord import Embed, User
 from discord.ui import View
 
 from bot.constants import emojis
@@ -15,18 +15,18 @@ class Amongus(View):
         self.bot = bot
         self.player = player
         self.impostors = impostors
-        self.msg = ("Click on crewmates (if you pick an impostor you lose...)\n"
-                    f"Current score: {self.score} ({self.reward} {emojis['currency']})")
 
     async def lost(self):
         """Called when pressing an impostor button"""
 
         await self.bot.db.update_user_wallet(self.player.id, self.reward)
 
-        lose_embed = Embed(title="You lost!", colour=Colour.red())
-        lose_embed.add_field(name="Score", value=self.score)
-        lose_embed.add_field(name="Reward", value=f"{self.reward} {emojis['currency']}")
-        lose_embed.add_field(name="Impostors", value=" ".join([str(b.emoji) for b in self.children if b.impostor]))
+        lose_embed = Embed(title="You lost!", color=0x2F3136)
+        lose_embed.add_field(name="Score", value=self._score)
+        lose_embed.add_field(
+            name="Reward", value=f"{self.reward} {emojis['currency']}")
+        lose_embed.add_field(name="Impostors", value=" ".join(  # value = every impostor button's emoji
+            [str(b.emoji) for b in self.children if b.impostor]))
 
         self.disable_all_items()
         self.stop()
@@ -35,40 +35,34 @@ class Amongus(View):
 
     async def update(self):
         """Update the message with the current score"""
-        self.score += 1
+        self._score += 1
 
-        if self.score == 10 - self.impostors:  # If every crewmate button is clicked
+        if self._score == 10 - self.impostors:  # If every crewmate button is clicked
             self._win_bonus = 50000
 
             await self.bot.db.update_user_wallet(self.player.id, self.reward)
 
-            win_embed = Embed(title="You won!", colour=Colour.green())
-            win_embed.add_field(name="Score", value=self.score)
-            win_embed.add_field(name="Reward", value=f"{self.reward} {emojis['currency']}")
+            win_embed = Embed(title="You won!", color=0x2F3136)
+            win_embed.add_field(name="Score", value=self._score)
+            win_embed.add_field(
+                name="Reward", value=f"{self.reward} {emojis['currency']}")
 
             return await self.message.edit(content=None, embed=win_embed, view=None)
 
         await self.message.edit(content=self.msg, view=self)
 
     @property
-    def score(self) -> int:
+    def msg(self) -> int:
         """the current score state"""
-        return self._score
-
-    @score.setter
-    def score(self, num: int) -> None:
-        """update the score state"""
-
-        self._score += 1
-        self.msg = ("Click on crewmates (if you pick an impostor you lose...)\n"
-                    f"Current score: {num} ({self.reward} {emojis['currency']})")
+        return ("Click on crewmates (if you pick an impostor you lose...)\n"
+                f"Current score: {self._score} ({self.reward} {emojis['currency']})")
 
     @property
     def reward(self) -> int:
         """Returns the reward depending on the current score"""
-        result = self.score * (self.impostors * 1750) + self._win_bonus
+        result = self._score * (self.impostors * 1750) + self._win_bonus
 
-        if self.score == 0:
+        if self._score == 0:
             result += 500
 
         return result

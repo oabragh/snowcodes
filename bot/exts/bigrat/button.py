@@ -13,12 +13,12 @@ class BoxButton(Button):
     async def callback(self, interaction: Interaction):
         if interaction.user.id != self.view.player.id:
             return await interaction.response.send_message(
-                "This is not for you, run `/bigrat` to play.", ephemeral=True
-            )
+                "This is not for you, run `/bigrat` to play.",
+                ephemeral=True)
 
         await interaction.response.defer()
 
-        self.show_hidden()
+        self.show_hidden()  # Show the box content
 
         if self.has_hat:
             self.style = ButtonStyle.success

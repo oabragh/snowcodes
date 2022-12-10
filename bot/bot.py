@@ -39,7 +39,7 @@ class _Bot(Bot):
             """
             CREATE TABLE IF NOT EXISTS "inventory" (
                 "id"        TEXT    NOT NULL UNIQUE,
-                "bank_note" INTEGER DEFAULT 0,
+                "vault_upgrade" INTEGER DEFAULT 0,
                 "xmas_hat"  INTEGER DEFAULT 0,
                 PRIMARY KEY("id")
             );
