@@ -12,7 +12,7 @@ class Amongus(View):
     def __init__(self, *, player: User, bot, impostors: int):
         super().__init__(timeout=30, disable_on_timeout=True)
 
-        self.helper = bot.dbh
+        self.bot = bot
         self.player = player
         self.impostors = impostors
         self.msg = ("Click on crewmates (if you pick an impostor you lose...)\n"
@@ -21,11 +21,12 @@ class Amongus(View):
     async def lost(self):
         """Called when pressing an impostor button"""
 
-        await self.helper.update_user_wallet(self.player.id, self.reward)
+        await self.bot.db.update_user_wallet(self.player.id, self.reward)
 
         lose_embed = Embed(title="You lost!", colour=Colour.red())
         lose_embed.add_field(name="Score", value=self.score)
         lose_embed.add_field(name="Reward", value=f"{self.reward} {emojis['currency']}")
+        lose_embed.add_field(name="Impostors", value=" ".join([str(b.emoji) for b in self.children if b.impostor]))
 
         self.disable_all_items()
         self.stop()
@@ -39,7 +40,7 @@ class Amongus(View):
         if self.score == 10 - self.impostors:  # If every crewmate button is clicked
             self._win_bonus = 50000
 
-            await self.helper.update_user_wallet(self.player.id, self.reward)
+            await self.bot.db.update_user_wallet(self.player.id, self.reward)
 
             win_embed = Embed(title="You won!", colour=Colour.green())
             win_embed.add_field(name="Score", value=self.score)

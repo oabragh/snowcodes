@@ -21,3 +21,9 @@ I learnt a few stuff such as `random.shuffle()` and how to use views :), then i 
 And i spent a few hours (4h actually) to make among-us working..
 
 Tomorrow i'll make `/bigrat` command and other economy commands!
+
+# Day 5:
+I added amongies emojis to buttons in `/among-us`, it looks better now!!
+Annnd i added `/bigrat`.. well it worked in the server but not in my machine.
+
+I havent added more economy commands yet so i focus on those tomorrow.

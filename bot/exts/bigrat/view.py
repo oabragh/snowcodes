@@ -10,7 +10,7 @@ class Bigrat(View):
     def __init__(self, *, player: User, bot):
         super().__init__(timeout=30, disable_on_timeout=True)
 
-        self.helper = bot.dbh
+        self.bot = bot
         self.player = player
 
 
@@ -28,7 +28,7 @@ class Bigrat(View):
             reward = randint(1000, 2500)
 
             lose_embed.description = f"Oh, Bigrat gave you {reward} {emojis['currency']} for playing with him!"
-            await self.helper.update_user_wallet(self.player.id, reward)
+            await self.bot.db.update_user_wallet(self.player.id, reward)
 
         self.disable_all_items()
         self.stop()
@@ -40,7 +40,7 @@ class Bigrat(View):
         reward = randint(20000, 25000)
         reward_msg = f"You got {reward} {emojis['currency']} from bigrat!"
 
-        await self.helper.update_user_wallet(self.player.id, reward)
+        await self.bot.db.update_user_wallet(self.player.id, reward)
 
         hat_bigrat_img = File("bot/assets/bigrat-christmas-hat.png")
 
