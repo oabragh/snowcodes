@@ -1,5 +1,5 @@
 emojis = {
-    "currency": "<:SnowflakeCoin:1050762100613599293>",
+    "currency": "<:SnowflakeCoin:1051490109230428161>",
     "xmas-hat": "<:XmasHat:1050777097678884904>",
     "gift": "<:Gift:1050744370925666394>",
     "amongies": [
