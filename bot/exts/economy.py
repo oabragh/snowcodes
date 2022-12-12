@@ -87,58 +87,14 @@ class Currency(Cog):
     @option("amount", str)
     async def deposit_cmd(self, ctx: ApplicationContext, amount: str):
         """Deposit money to your vault"""
-        if amount.isdigit() and int(amount) <= 0:
-            return await ctx.respond("Too low!", ephemeral=True)
+        await ctx.respond("Working on it")
 
-        try:
-            _, wallet, vault, _ = await self.bot.db.deposit_user_wallet(ctx.author.id, amount)
-            success_embed = Embed(title="You deposited", color=0x2F3136)
-            success_embed.add_field(
-                name="Wallet now:", value=f"{wallet} {emojis['currency']}")
-            success_embed.add_field(
-                name="Vault now:", value=f"{vault} {emojis['currency']}")
-
-            await ctx.respond(embed=success_embed)
-
-        except ApplicationCommandError as e:
-            if isinstance(e, NotEnoughVaultCapacity):
-                await ctx.respond("Your vault capacity is small. Use `Vault Upgrade Token` to upgrade it", ephemeral=True)
-
-            elif isinstance(e, NotEnoughWallet):
-                await ctx.respond("You don't have that amount...", ephemeral=True)
-
-            elif isinstance(e, WalletEmpty):
-                await ctx.respond("Your wallet is empty.", ephemeral=True)
-
-            elif isinstance(e, InvalidAmount):
-                await ctx.respond("Invalid amount. please enter a valid number")
 
     @command(name="withdraw", guild_ids=[1041363391790465075])
     @option("amount", str)
     async def withdraw_cmd(self, ctx: ApplicationContext, amount: str):
         """Withdraw money from your vault"""
-        if amount.isdigit() and int(amount) <= 0:
-            return await ctx.respond("Too low!", ephemeral=True)
-
-        try:
-            _, wallet, vault, _ = await self.bot.db.withdraw_user_vault(ctx.author.id, amount)
-            success_embed = Embed(title="You withdrew", color=0x2F3136)
-            success_embed.add_field(
-                name="Wallet now:", value=f"{wallet} {emojis['currency']}")
-            success_embed.add_field(
-                name="Vault now:", value=f"{vault} {emojis['currency']}")
-
-            await ctx.respond(embed=success_embed)
-
-        except ApplicationCommandError as e:
-            if isinstance(e, NotEnoughVault):
-                await ctx.respond("You don't have that amount in vault...", ephemeral=True)
-
-            if isinstance(e, VaultEmpty):
-                await ctx.respond("Your vault is empty.", ephemeral=True)
-
-            elif isinstance(e, InvalidAmount):
-                await ctx.respond("Invalid amount. please enter a valid number")
+        await ctx.respond("Working on it")
 
 
 def setup(bot: _Bot):

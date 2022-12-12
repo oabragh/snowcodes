@@ -43,64 +43,75 @@ class Database(Cog):
 
         return (id, wallet, vault, max)
 
-    async def deposit_user_wallet(self, id: int, amount: int | str):
+    async def update_user_vault(self, id: int, change: int):
+        """Update player wallet"""
         async with self.bot.conn.cursor() as cur:
             id, wallet, vault, max = await self.get_user_balance(id)
+            query = "UPDATE balances SET vault=? WHERE id=?"
+            wallet += change
 
-            if not amount in ["all", "max"] and not amount.isdigit():
-                raise InvalidAmount()
-
-            if amount == "all":
-                amount = wallet
-            elif amount == "max":
-                amount = max-vault
-
-            amount = int(amount)
-
-            if wallet == 0:
-                raise WalletEmpty()
-
-            if wallet < amount:
-                raise NotEnoughWallet()
-
-            elif (vault + amount) > max:
-                raise NotEnoughVaultCapacity()
-
-            query = "UPDATE balances SET vault=?, wallet=? WHERE id=?"
-            vault += amount
-            wallet -= amount
-
-            await cur.execute(query, (vault, wallet, id))
+            await cur.execute(query, (wallet, id))
             await self.bot.conn.commit()
 
         return (id, wallet, vault, max)
 
-    async def withdraw_user_vault(self, id: int, amount: int | str):
-        async with self.bot.conn.cursor() as cur:
-            id, wallet, vault, max = await self.get_user_balance(id)
+    # async def deposit_user_wallet(self, id: int, amount: int | str):
+    #     id, wallet, vault, max = await self.get_user_balance(id)
 
-            if not amount in ["all", "max"] and not amount.isdigit():
-                raise InvalidAmount()
+    #     if not amount in ["all", "max"] and not amount.isdigit():
+    #         raise InvalidAmount()
 
-            if amount == "all":
-                amount = vault
+    #     if amount.lower() == "all":
+    #         amount = wallet
+    #     elif amount.lower() == "max":
+    #         amount = max-vault
+            
+    #     amount = int(amount)
 
-            amount = int(amount)
+    #     if wallet == 0:
+    #         raise WalletEmpty()
 
-            if vault == 0:
-                raise VaultEmpty()
+    #     elif wallet > amount:
+    #         raise NotEnoughWallet()
 
-            if vault < amount:
-                raise NotEnoughVault()
+    #     elif (vault + amount) > max:
+    #         raise NotEnoughVaultCapacity()
 
-            query = "UPDATE balances SET vault=?, wallet=? WHERE id=?"
-            vault -= amount
-            wallet += amount
+    #         query = "UPDATE balances SET vault=?, wallet=? WHERE id=?"
+    #         vault += amount
+    #         wallet -= amount
 
-            await cur.execute(query, (vault, wallet, id))
-            await self.bot.conn.commit()
+    #         await cur.execute(query, (vault, wallet, id))
+    #         await self.bot.conn.commit()
 
-        return (id, wallet, vault, max)
+    #     return (id, wallet, vault, max)
+
+    # async def withdraw_user_vault(self, id: int, amount: int | str):
+    #     async with self.bot.conn.cursor() as cur:
+    #         id, wallet, vault, max = await self.get_user_balance(id)
+
+    #         if not amount in ["all", "max"] and not amount.isdigit():
+    #             raise InvalidAmount()
+
+    #         if amount == "all":
+    #             amount = vault
+    #         if str(amount).isdigit():
+    #             amount = int(amount)
+
+    #         if vault == 0:
+    #             raise VaultEmpty()
+
+    #         if vault < amount:
+    #             raise NotEnoughVault()
+
+    #         query = "UPDATE balances SET vault=?, wallet=? WHERE id=?"
+    #         vault -= amount
+    #         wallet += amount
+
+    #         await cur.execute(query, (vault, wallet, id))
+    #         await self.bot.conn.commit()
+
+    #     return (id, wallet, vault, max)
 
     # async def create_user_inventory(self, id: int, item = None):
     #     async with self.bot.conn.cursor() as cur:
