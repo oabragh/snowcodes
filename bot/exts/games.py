@@ -1,6 +1,6 @@
 from random import shuffle, choice
 
-from discord import (ApplicationContext, Colour, Embed, File, Cog, option,
+from discord import (ApplicationContext, Member, Embed, File, Cog, option,
                      command)
 from bot.bot import _Bot
 from bot.constants import emojis
@@ -8,7 +8,7 @@ from bot.exts.amongus.button import AmongieButton
 from bot.exts.amongus.view import Amongus
 from bot.exts.bigrat.button import BoxButton
 from bot.exts.bigrat.view import Bigrat
-
+from bot.exts.duel.view import DuelInvite
 
 class Games(Cog):
     def __init__(self, bot):
@@ -65,12 +65,27 @@ class Games(Cog):
 
         bigrat_embed = Embed(
             title="Guess what box contains bigrat's hat :thinking:",
-            color=Colour.blurple()
+            color=0x2F3136
         )
 
         bigrat_embed.set_image(url="attachment://bigrat.png")
 
         await ctx.respond(embed=bigrat_embed, view=view, file=bigrat_img)
+
+    @command(name="duel", guild_ids=[1041363391790465075])
+    @option("player", Member)
+    async def duel_cmd(self, ctx: ApplicationContext, player: Member, bet: int):
+        invite_embed = Embed(title="Do you accept challenge?",
+                             description=f"{ctx.author.mention} invited you to a duel, You have 60s to accept.",
+                             color=0x2F3136)
+
+        duel = DuelInvite(player=player, author=ctx.author, bet=bet)
+
+        await ctx.respond(
+            player.mention,
+            embed=invite_embed,
+            view=duel
+        )
 
 
 def setup(bot: _Bot):

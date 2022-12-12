@@ -60,9 +60,9 @@ class Amongus(View):
     @property
     def reward(self) -> int:
         """Returns the reward depending on the current score"""
-        result = self._score * (self.impostors * 1750) + self._win_bonus
+        result = self._score * (self.impostors * 750) + self._win_bonus
 
         if self._score == 0:
-            result += 500
+            result += 250
 
         return result
