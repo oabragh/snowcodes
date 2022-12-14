@@ -11,7 +11,7 @@ class Currency(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name="balance", guild_ids=[1041363391790465075])
+    @command(name="balance", guild_ids=[1041363391790465075, 1051567321535225896])
     @option("player", Member)
     async def balance_cmd(self, ctx: ApplicationContext, player: Member = None):
         """Show your or someone else's balance."""
@@ -42,7 +42,7 @@ class Currency(Cog):
         balance_png = File("bot/assets/balance.png")
         await ctx.respond(embed=balance_embed, file=balance_png)
 
-    @command(name="pay", guild_ids=[1041363391790465075])
+    @command(name="pay", guild_ids=[1041363391790465075, 1051567321535225896])
     @option("player", Member, description="Your best friend's name :)")
     @option("amount", int, description="Amount of coins to send!")
     async def pay_cmd(self, ctx: ApplicationContext, player: Member, amount: int):
@@ -83,14 +83,14 @@ class Currency(Cog):
 
         await ctx.respond(embed=transaction_embed)
 
-    @command(name="deposit", guild_ids=[1041363391790465075])
+    @command(name="deposit", guild_ids=[1041363391790465075, 1051567321535225896])
     @option("amount", str)
     async def deposit_cmd(self, ctx: ApplicationContext, amount: str):
         """Deposit money to your vault"""
         await ctx.respond("Working on it")
 
 
-    @command(name="withdraw", guild_ids=[1041363391790465075])
+    @command(name="withdraw", guild_ids=[1041363391790465075, 1051567321535225896])
     @option("amount", str)
     async def withdraw_cmd(self, ctx: ApplicationContext, amount: str):
         """Withdraw money from your vault"""

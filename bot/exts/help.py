@@ -7,7 +7,7 @@ class Help(Cog):
     def __init__(self, bot: _Bot):
         self.bot = bot
 
-    @command(name="help", guild_ids=[1041363391790465075])
+    @command(name="help", guild_ids=[1041363391790465075, 1051567321535225896])
     async def help_cmd(self, ctx: ApplicationContext):
         """Shows you how to use the bot"""
         desc = (
@@ -23,7 +23,7 @@ class Help(Cog):
             title="Santa's commands:",
             description=desc,
             colour=0x2F3136,
-            url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            url="https://discord.gg/ggZn8PaQed",
         )
 
         help_embed.set_thumbnail(url="attachment://question.png")

@@ -34,14 +34,15 @@ class Duel(View):
 
     @property
     def game_embed(self):
-        em = Embed(title=" vs ".join(
-            [m.display_name for m in self.players]), color=0x2F3136)
+        em = Embed(color=0x2F3136)
         for i in self.stats.values():
             em.add_field(
                 name=i['name'], value=f"Health: {i['health']}/100 :heart:\nShield: {i['shield']}/100 :shield:")
 
-        if self.action:
-            em.description = self.action
+        if not self.action:
+            self.action = "Battle started!"
+
+        em.add_field(name="Last Action", value=f"`{self.action}`", inline=False)
 
         return em
 
@@ -51,74 +52,96 @@ class Duel(View):
     async def update(self):
         await self.message.edit(content=f"{self.current_player.mention}, Its your turn.", embed=self.game_embed)
 
-    async def won(self, player: Member):
+    async def damage(self, player, amount):
+        shield = (self.stats[player]["shield"]/100)*100
+        self.stats[player]["health"] -= (amount)
 
-        reward = ""
+        if self.stats[player]["health"] < 0:
+            self.stats[player]["health"] = 0
 
-        if self.bet:
-            reward = f"for {self.bet*2} {emojis['currency']}"
+            return True
 
+        return False
+
+    async def won(self, winner: Member, loser: Member):
         win_embed = Embed(
             title="Duel finished.",
-            description=f"{self.current_player.mention} Won {self.next_player.mention} {reward}",
+            description=f"{self.current_player.mention} beat {self.next_player.mention}! :flex:",
             color=0X2F3136)
 
-        win_embed .add_field(name="Reward", value="nothing heh")
-        await self.message.edit(content=f"{self.current_player.mention} Won the battle!", embed=win_embed, view=None)
+        if self.bet:
+            win_embed.add_field(
+                name="Reward", value=f"{self.bet*2} {emojis['currency']}")
+            
+            await self.bot.db.update_user_wallet(winner.id, self.bet*2)
+            await self.bot.db.update_user_wallet(loser.id, -self.bet)
+            
+
+        await self.message.edit(content=None, embed=win_embed, view=None)
 
         self.stop()
-
-    @button(label="Throw Snowball")
+    
+    @button(label="Punch", emoji=emojis['punch'])
     async def punch(self, button: Button, interaction: Interaction):
         if not interaction.user.id == self.current_player.id:
             return await interaction.response.send_message("It's not your turn.", ephemeral=True)
 
         await interaction.response.defer()
 
-        damage = randint(5, 15)
+        damage = randint(5, 20)
 
-        self.stats[self.next_player]["health"] -= damage
+        result = await self.damage(self.next_player, damage)
 
-        if self.stats[self.next_player]["health"] <= 0:
-            return await self.won(self.current_player)
+        if result:
+            return await self.won(self.current_player, self.next_player)
 
-        self.action = f"{self.current_player.mention} threw a snowball on {self.next_player.mention} dealing {damage} damage!"
+        self.action = f"{self.current_player.display_name} punched {self.next_player.display_name} dealing {damage} damage!"
+
         self.swap()
         await self.update()
 
-    @button(label="Kick")
-    async def kick(self, button: Button, interaction: Interaction):
+    @button(label="Snowball Attack", emoji=emojis['snowball'])
+    async def snowball(self, button: Button, interaction: Interaction):
         if not interaction.user.id == self.current_player.id:
             return await interaction.response.send_message("It's not your turn.", ephemeral=True)
 
         await interaction.response.defer()
 
-        damage = randint(0, 32)
+        dmg = randint(6, 32)
+        choices = [dmg, dmg, 0, dmg, dmg]
 
-        self.stats[self.next_player]["health"] -= damage
+        damage = choice(choices)
 
-        if self.stats[self.next_player]["health"] <= 0:
-            return await self.won(self.current_player)
-
-        self.action = f"{self.current_player.mention} kicked {self.next_player.mention} dealing {damage} damage!"
+        self.action = f"{self.current_player.display_name} threw a snowball on {self.next_player.display_name} dealing {damage} damage!"
 
         if damage == 0:
-            self.action = f"{self.current_player.display_name} tried to kick but FELL DOWN!"
+            self.action = f"{self.current_player.display_name} tried to throw snowball but his aim sucks!"
+
+        result = await self.damage(self.next_player, damage)
+
+        if result:
+            return await self.won(self.current_player, self.next_player)
 
         self.swap()
         await self.update()
 
-    @button(label="Upgrade Defense", style=ButtonStyle.primary)
+    @button(label="Upgrade Defense", style=ButtonStyle.primary, emoji=emojis['shield'])
     async def defend(self, button: Button, interaction: Interaction):
         if not interaction.user.id == self.current_player.id:
             return await interaction.response.send_message("It's not your turn.", ephemeral=True)
+
+        if self.stats[self.current_player]["shield"] == 100:
+            return await interaction.response.send_message("Your shield is maxed out. try something else", ephemeral=True)
 
         await interaction.response.defer()
 
         upgrade = randint(5, 25)
         self.stats[self.current_player]["shield"] += upgrade
 
-        self.action = f"{self.current_player.mention} upgraded their defense!"
+        if self.stats[self.current_player]["shield"] > 100:
+            self.stats[self.current_player]["shield"] = 100
+
+        self.action = f"{self.current_player.display_name} upgraded their defense!"
         self.swap()
         await self.update()
 
@@ -135,6 +158,7 @@ class DuelInvite(View):
     async def accept(self, button: Button, interaction: Interaction):
         if not interaction.user.id == self.player.id:
             return await interaction.response.send_message("This is not for you.", ephemeral=True)
+        self.disable_all_items()
         self.stop()
 
         await self.start_duel(interaction)
@@ -149,7 +173,7 @@ class DuelInvite(View):
         reject_embed = Embed(title="Duel rejected.", color=0x2F3136)
         await interaction.response.edit_message(embed=reject_embed, view=self)
 
-    async def start_duel(self, inter):
+    async def start_duel(self, inter: Interaction):
         view = Duel(players=[self.author, self.player], bet=self.bet)
 
         await inter.response.send_message(f"{view.current_player.mention}, It's your turn.", embed=view.game_embed, view=view)

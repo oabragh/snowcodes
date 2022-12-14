@@ -17,3 +17,7 @@ My SnowCodes Hackathon Submission.
 - Day 6:
     - new bot icon & more ui improvements
     - new commands! [`/withdraw`, `/deposit`]
+- Day 7:
+    - new command `/duel` but it doenst work properly
+- Day 8:
+    - a few `/duel` fixes
