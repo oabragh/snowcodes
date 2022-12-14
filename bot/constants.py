@@ -19,5 +19,8 @@ emojis = {
         '<:crewmate_green:1050840819919228979>'
         '<:crewmate_gray:1050841046101270598>'
         ],
-    "snowball": "<:Snowball:1051891976221495428>"
+    "snowball": "<:Snowball:1051891976221495428>",
+    "punch": "<:Punch:1052222855464624158>",
+    "snowflake": "<:Snowflake:1052222859252080650>",
+    "shield": "<:Shield:1052225326773719071>"
 }
