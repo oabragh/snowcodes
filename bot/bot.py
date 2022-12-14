@@ -28,19 +28,9 @@ class _Bot(Bot):
     async def setup_database(self) -> None:
         queries = [
             """
-            CREATE TABLE IF NOT EXISTS "balances" (
+            CREATE TABLE IF NOT EXISTS "players" (
                 "id"	    TEXT    NOT NULL UNIQUE,
-                "wallet"	INTEGER NOT NULL DEFAULT 1000,
-                "vault"	    INTEGER NOT NULL DEFAULT 0,
-                "max"       INTEGER NOT NULL DEFAULT 25000,
-                PRIMARY KEY("id")
-            );
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS "inventory" (
-                "id"        TEXT    NOT NULL UNIQUE,
-                "vault_upgrade" INTEGER DEFAULT 0,
-                "xmas_hat"  INTEGER DEFAULT 0,
+                "score"	    INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY("id")
             );
             """
