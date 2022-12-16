@@ -125,7 +125,7 @@ class AmongusCommand(dc.Cog):
         choices=["2", "3", "4", "5"],
     )
     async def amongus_cmd(self, ctx: dc.ApplicationContext, impostors: int):
-        """Among us mini-game :D"""
+        """Play Among us based mini-game"""
 
         view = Amongus(player=ctx.author, bot=self.bot, impostors=impostors)
 

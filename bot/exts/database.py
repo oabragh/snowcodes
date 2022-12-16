@@ -35,6 +35,9 @@ class Database(Cog):
             query = "UPDATE players SET score=? WHERE id=?"
             score += change
 
+            if score <= 0:  # Score can't be negative
+                score = 0
+
             await cur.execute(query, (score, id))
             await self.bot.conn.commit()
 

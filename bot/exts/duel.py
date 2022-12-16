@@ -11,9 +11,10 @@ from bot.constants import emojis
 class Duel(View):
     action = None
 
-    def __init__(self, players: t.List[dc.Member]):
+    def __init__(self, players: t.List[dc.Member], bot):
         super().__init__(timeout=60, disable_on_timeout=True)
 
+        self.bot = bot
         self.players = players
         self.current_player = choice(self.players)
         self.next_player = [i for i in self.players if not i == self.current_player][0]
@@ -73,7 +74,7 @@ class Duel(View):
 
     async def won(self, winner: dc.Member, loser: dc.Member):
         winner_xp = randint(4000, 6000)
-        loser_xp = 250
+        loser_xp = -250
 
         await self.bot.db.update_user_score(winner.id, winner_xp)
         await self.bot.db.update_user_score(loser.id, loser_xp)
@@ -87,8 +88,8 @@ class Duel(View):
         win_embed.set_image(url="attachment://green-line.jpg")
         win_embed.add_field(
             name="Score:",
-            value=f"{emojis['plus']} {winner.mention} - {winner_xp}xp\
-                \n{emojis['minus']} {loser.mention} - {loser_xp}xp",
+            value=f"{emojis['plus']} {winner_xp}xp:  {winner.mention}\
+                \n{emojis['minus']} {loser_xp}xp: {loser.mention} ",
         )
 
         await self.message.edit(
@@ -176,9 +177,10 @@ class Duel(View):
 
 
 class DuelInvite(View):
-    def __init__(self, player: dc.Member, author: dc.Member):
+    def __init__(self, player: dc.Member, author: dc.Member, bot):
         super().__init__(timeout=60, disable_on_timeout=True)
 
+        self.bot = bot
         self.author = author
         self.player = player
 
@@ -206,7 +208,7 @@ class DuelInvite(View):
         await interaction.response.edit_message(embed=reject_embed, view=self)
 
     async def start_duel(self, inter: dc.Interaction):
-        view = Duel(players=[self.author, self.player])
+        view = Duel(players=[self.author, self.player], bot=self.bot)
 
         await inter.response.send_message(
             f"{view.current_player.mention}, It's your turn.",
@@ -230,7 +232,7 @@ class DuelCommand(dc.Cog):
         )
         invite_embed.set_footer(text="you have 60s to respond.")
 
-        duel = DuelInvite(player=player, author=ctx.author)
+        duel = DuelInvite(player=player, author=ctx.author, bot=self.bot)
 
         await ctx.respond(player.mention, embed=invite_embed, view=duel)
 
