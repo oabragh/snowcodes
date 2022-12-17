@@ -1,13 +1,13 @@
 from random import randint, shuffle
 
 import discord as dc
-from discord.ui import Button, View
+import discord.ui as ui
 
 from bot.bot import _Bot
 from bot.constants import emojis
 
 
-class BoxButton(Button):
+class BoxButton(ui.Button):
     def __init__(self, has_hat=False):
         super().__init__(style=dc.ButtonStyle.gray, emoji=emojis["gift"])
 
@@ -41,7 +41,7 @@ class BoxButton(Button):
                 i.label = "\u2800"
 
 
-class Bigrat(View):
+class Bigrat(ui.View):
     def __init__(self, *, player: dc.User, bot):
         super().__init__(timeout=30, disable_on_timeout=True)
 
@@ -59,7 +59,7 @@ class Bigrat(View):
         lose_embed.set_image(url="attachment://bigrat.png")
 
         if chance == 3:
-            score = randint(1000, 2500)
+            score = randint(1000, 1500)
 
             lose_embed.description = (
                 f"Oh, you still get {score}xp because bigrat enjoyed!"
@@ -73,7 +73,7 @@ class Bigrat(View):
 
     async def won(self):
         """Called when the player clicks the right button"""
-        score = randint(20000, 25000)
+        score = randint(400, 500)
         score_msg = f"You earned {score}xp winning!"
 
         await self.bot.db.update_user_score(self.player.id, score)

@@ -2,22 +2,24 @@ import typing as t
 from random import choice, randint
 
 import discord as dc
-from discord.ui import Button, View, button
+import discord.ui as ui
 
 from bot.bot import _Bot
 from bot.constants import emojis
 
 
-class Duel(View):
+class Duel(ui.View):
     action = None
 
-    def __init__(self, players: t.List[dc.Member], bot):
+    def __init__(self, players: t.List[dc.Member], bot: _Bot):
         super().__init__(timeout=60, disable_on_timeout=True)
 
-        self.bot = bot
+        self.bot: _Bot = bot
+
         self.players = players
-        self.current_player = choice(self.players)
-        self.next_player = [i for i in self.players if not i == self.current_player][0]
+        self.current_player: dc.Member = choice(self.players)
+        self.next_player: dc.Member = [
+            i for i in self.players if not i == self.current_player][0]
 
         self.stats = {
             self.players[0]: {
@@ -34,63 +36,74 @@ class Duel(View):
 
     @property
     def game_embed(self):
-        em = dc.Embed(color=0x2F3136)
-        for i in self.stats.values():
-            em.add_field(
-                name=i["name"],
-                value=f"Health: {i['health']}/100 :heart:\nShield: {i['shield']}/100 :shield:",
-            )
+        """Returns the game embed."""
+        embed = dc.Embed(color=0x2F3136)
 
-        if not self.action:
+        for i in self.stats.values():  # Add a field for each player
+            player_health = f"Health: {i['health']}/100 :heart:"
+            player_shield = f"Shield: {i['shield']}/100 :shield:"
+            embed.add_field(
+                name=i["name"], value=f"{player_health}\n{player_shield}")
+
+        if not self.action:  # If no action exist, its most likely the battle just started.
             self.action = "Battle started!"
 
-        em.add_field(name="Last Action", value=f"`{self.action}`", inline=False)
+        embed.add_field(name="Last Action",
+                        value=f"`{self.action}`", inline=False)
 
-        return em
+        return embed
 
     def swap(self):
+        """Swaps play turns after """
         self.current_player, self.next_player = self.next_player, self.current_player
 
+    def stop(self):
+        for i in self.players:
+            self.bot.on_going_duels.remove(i.id)
+        super().stop()
+
     async def update(self):
+        """Edit the game message with the current stats"""
         await self.message.edit(
             content=f"{self.current_player.mention}, Its your turn.",
             embed=self.game_embed,
         )
 
     async def damage(self, player, amount):
+        """Damages a player and reducing depending on the shield"""
         shield = self.stats[player]["shield"]
         reduce_percentage = shield * 45 / 100
 
-        new_damage = amount - amount * reduce_percentage / 100
+        new_damage = amount - int(amount * reduce_percentage / 100)
 
-        self.stats[player]["health"] -= int(new_damage)
+        self.stats[player]["health"] -= new_damage
 
-        if self.stats[player]["health"] <= 0:
+        if self.stats[player]["health"] <= 0:  # To prevent health from being under 0
             self.stats[player]["health"] = 0
 
-            return True
+            return True  # Player has lost
 
-        return False
+        return False  # Player can still play
 
-    async def won(self, winner: dc.Member, loser: dc.Member):
-        winner_xp = randint(4000, 6000)
-        loser_xp = -250
+    async def end(self, winner: dc.Member, loser: dc.Member):
+        winner_xp = randint(500, 1000)
+        loser_xp = 250
 
+        # Update scores
         await self.bot.db.update_user_score(winner.id, winner_xp)
-        await self.bot.db.update_user_score(loser.id, loser_xp)
+        await self.bot.db.update_user_score(loser.id, -loser_xp)
 
-        win_embed = dc.Embed(
-            title="Duel finished.",
-            description=f"{self.current_player.mention} won {self.next_player.mention}! :muscle:",
-            color=0x2F3136,
-        )
+        result = f"{self.current_player.mention} won {self.next_player.mention}! :muscle:"
 
+        win_embed = dc.Embed(title="Duel finished.", description=result, color=0x2F3136)
         win_embed.set_image(url="attachment://green-line.jpg")
         win_embed.add_field(
             name="Score:",
             value=f"{emojis['plus']} {winner_xp}xp:  {winner.mention}\
                 \n{emojis['minus']} {loser_xp}xp: {loser.mention} ",
         )
+
+        self.stop()
 
         await self.message.edit(
             content=None,
@@ -99,10 +112,8 @@ class Duel(View):
             file=dc.File("bot/assets/green-line.jpg"),
         )
 
-        self.stop()
-
-    @button(label="Punch", emoji=emojis["punch"])
-    async def punch(self, button: Button, interaction: dc.Interaction):
+    @ui.button(label="Punch", emoji=emojis["punch"])
+    async def punch(self, button: ui.Button, interaction: dc.Interaction):
         if not interaction.user.id == self.current_player.id:
             return await interaction.response.send_message(
                 "It's not your turn.", ephemeral=True
@@ -112,18 +123,18 @@ class Duel(View):
 
         damage = randint(5, 25)
 
-        result = await self.damage(self.next_player, damage)
+        has_lost = await self.damage(self.next_player, damage)
 
-        if result:
-            return await self.won(self.current_player, self.next_player)
+        if has_lost:
+            return await self.end(self.current_player, self.next_player)
 
         self.action = f"{self.current_player.display_name} punched {self.next_player.display_name} dealing {damage} damage!"
 
         self.swap()
         await self.update()
 
-    @button(label="Snowball Attack", emoji=emojis["snowball"])
-    async def snowball(self, button: Button, interaction: dc.Interaction):
+    @ui.button(label="Snowball Attack", emoji=emojis["snowball"])
+    async def snowball(self, button: ui.Button, interaction: dc.Interaction):
         if not interaction.user.id == self.current_player.id:
             return await interaction.response.send_message(
                 "It's not your turn.", ephemeral=True
@@ -141,18 +152,18 @@ class Duel(View):
         if damage == 0:
             self.action = f"{self.current_player.display_name} tried to throw snowball but his aim sucks!"
 
-        result = await self.damage(self.next_player, damage)
+        has_lost = await self.damage(self.next_player, damage)
 
-        if result:
-            return await self.won(self.current_player, self.next_player)
+        if has_lost:
+            return await self.end(self.current_player, self.next_player)
 
         self.swap()
         await self.update()
 
-    @button(
+    @ui.button(
         label="Upgrade Defense", style=dc.ButtonStyle.primary, emoji=emojis["shield"]
     )
-    async def defend(self, button: Button, interaction: dc.Interaction):
+    async def defend(self, button: ui.Button, interaction: dc.Interaction):
         if not interaction.user.id == self.current_player.id:
             return await interaction.response.send_message(
                 "It's not your turn.", ephemeral=True
@@ -176,7 +187,7 @@ class Duel(View):
         await self.update()
 
 
-class DuelInvite(View):
+class DuelInvite(ui.View):
     def __init__(self, player: dc.Member, author: dc.Member, bot):
         super().__init__(timeout=60, disable_on_timeout=True)
 
@@ -184,8 +195,9 @@ class DuelInvite(View):
         self.author = author
         self.player = player
 
-    @button(label="Accept", style=dc.ButtonStyle.success)
-    async def accept(self, button: Button, interaction: dc.Interaction):
+
+    @ui.button(label="Accept", style=dc.ButtonStyle.success)
+    async def accept(self, button: ui.Button, interaction: dc.Interaction):
         if not interaction.user.id == self.player.id:
             return await interaction.response.send_message(
                 "This is not for you.", ephemeral=True
@@ -195,8 +207,8 @@ class DuelInvite(View):
 
         await self.start_duel(interaction)
 
-    @button(label="Reject", style=dc.ButtonStyle.danger)
-    async def reject(self, button: Button, interaction: dc.Interaction):
+    @ui.button(label="Reject", style=dc.ButtonStyle.danger)
+    async def reject(self, button: ui.Button, interaction: dc.Interaction):
         if not interaction.user.id == self.player.id:
             return await interaction.response.send_message(
                 "This is not for you.", ephemeral=True
@@ -208,6 +220,21 @@ class DuelInvite(View):
         await interaction.response.edit_message(embed=reject_embed, view=self)
 
     async def start_duel(self, inter: dc.Interaction):
+        """Sends the game message and prevents multiple game sessions"""
+        playing = []
+
+        if inter.user.id in self.bot.on_going_duels:
+            playing.append("You")
+
+        if self.author.id in self.bot.on_going_duels:
+            playing.append(self.author.mention)
+
+        if playing:
+            players = " and ".join(playing)
+            return await inter.response.send_message(f"{players} already have an ongoing duel...", ephemeral=True)
+        
+        self.bot.on_going_duels.extend([self.author.id, inter.user.id])
+
         view = Duel(players=[self.author, self.player], bot=self.bot)
 
         await inter.response.send_message(

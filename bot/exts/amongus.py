@@ -1,20 +1,19 @@
 from random import choice, shuffle
 
 import discord as dc
-from discord import ButtonStyle, Embed, Interaction, User
-from discord.ui import Button, View
+import discord.ui as ui
 
 from bot.bot import _Bot
 from bot.constants import emojis
 
 
-class AmongieButton(Button):
+class AmongieButton(ui.Button):
     def __init__(self, impostor=False):
-        super().__init__(style=ButtonStyle.gray)  # Emoji is added later
+        super().__init__(style=dc.ButtonStyle.gray)  # Emoji is added later
 
-        self.impostor = impostor
+        self.impostor: bool = impostor
 
-    async def callback(self, interaction: Interaction):
+    async def callback(self, interaction: dc.Interaction):
         if interaction.user.id != self.view.player.id:
             return await interaction.response.send_message(
                 "This is not for you, run `/among-us` to play.", ephemeral=True
@@ -22,13 +21,18 @@ class AmongieButton(Button):
 
         await interaction.response.defer()
 
+        """
+        If the clicked amongie button is an impostor, call `self.view.lost()`
+        Else the button becames green and disabled.
+        """
+
         if self.impostor:
-            self.style = ButtonStyle.danger
+            self.style = dc.ButtonStyle.danger
 
             await self.view.lost()
 
         else:
-            self.style = ButtonStyle.success
+            self.style = dc.ButtonStyle.success
             self.disabled = True
 
             await self.view.update()
@@ -36,37 +40,40 @@ class AmongieButton(Button):
         return await super().callback(interaction)
 
 
-class Amongus(View):
+class Amongus(ui.View):
 
     _score = 0
     _win_bonus = 0  # you get this when you win, default to 0
 
-    def __init__(self, *, player: User, bot, impostors: int):
+    def __init__(self, *, player: dc.User, bot: _Bot, impostors: int):
         super().__init__(timeout=30, disable_on_timeout=True)
 
-        self.bot = bot
+        self.bot: _Bot = bot
         self.player = player
         self.impostors = impostors
 
     async def lost(self):
         """Called when pressing an impostor button"""
 
+        # Update the user's score.
         await self.bot.db.update_user_score(self.player.id, self.reward - 250)
 
-        lose_embed = Embed(title="You lost!", color=0x2F3136)
-        lose_embed.add_field(name="Score", value=self._score)
-        lose_embed.add_field(name="XP", value=f"{self.reward-250}xp")
-        lose_embed.add_field(
-            name="Impostors",
-            value=" ".join(  # value = every impostor button's emoji
-                [str(b.emoji) for b in self.children if b.impostor]
-            ),
-        )
-
-        lose_embed.set_image(url="attachment://red-line.jpg")
-
+        # Disable view
         self.disable_all_items()
         self.stop()
+
+        if not self.message:  # Don't expect users to play properly....
+            return  # Don't attempt to edit message.
+
+        # Send embed
+
+        impostors = " ".join([str(b.emoji)
+                             for b in self.children if b.impostor])
+        lose_embed = dc.Embed(title="You lost!", color=0x2F3136)
+        lose_embed.add_field(name="Score", value=self._score)
+        lose_embed.add_field(name="XP", value=f"{self.reward-250}xp")
+        lose_embed.add_field(name="Impostors", value=impostors)
+        lose_embed.set_image(url="attachment://red-line.jpg")
 
         await self.message.edit(
             content=None,
@@ -80,11 +87,12 @@ class Amongus(View):
         self._score += 1
 
         if self._score == 10 - self.impostors:  # If every crewmate button is clicked
-            self._win_bonus = 50000
+            self._win_bonus = 1000
 
+            # Update the user's score.
             await self.bot.db.update_user_score(self.player.id, self.reward)
 
-            win_embed = Embed(title="You won!", color=0x2F3136)
+            win_embed = dc.Embed(title="You won!", color=0x2F3136)
             win_embed.add_field(name="Score", value=self._score)
             win_embed.add_field(name="XP", value=f"{self.reward}xp")
             win_embed.set_image(url="attachment://green-line.jpg")
@@ -96,11 +104,12 @@ class Amongus(View):
                 file=dc.File("bot/assets/green-line.jpg"),
             )
 
+        # Update view
         await self.message.edit(content=self.msg, view=self)
 
     @property
     def msg(self) -> int:
-        """the current score state"""
+        """the current score state (used in the game message)"""
         return (
             "Click on crewmates (if you pick an impostor you lose...)\n"
             f"Current score: {self._score} ({self.reward}xp)"
@@ -108,8 +117,12 @@ class Amongus(View):
 
     @property
     def reward(self) -> int:
-        """Returns the reward depending on the current score"""
-        result = self._score * (self.impostors * 750) + self._win_bonus
+        """
+        Returns the reward depending on the current score.
+
+        every crewmate clicked * (impostors count * 750) + win bonus if you won
+        """
+        result = self._score * (self.impostors * 150) + self._win_bonus
 
         return result
 
@@ -125,7 +138,7 @@ class AmongusCommand(dc.Cog):
         choices=["2", "3", "4", "5"],
     )
     async def amongus_cmd(self, ctx: dc.ApplicationContext, impostors: int):
-        """Play Among us based mini-game"""
+        """Play Among us based mini-game."""
 
         view = Amongus(player=ctx.author, bot=self.bot, impostors=impostors)
 
@@ -138,7 +151,7 @@ class AmongusCommand(dc.Cog):
 
         for i in buttons:
             emoji = choice(amongies)
-            while emoji in used_emojis:
+            while emoji in used_emojis:  # To make sure there are no duplicated emojis
                 emoji = choice(amongies)
 
             i.emoji = emoji

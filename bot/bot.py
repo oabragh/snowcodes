@@ -9,6 +9,9 @@ class _Bot(Bot):
         super().__init__()
 
         self.conn: aiosqlite.Connection = None
+        self.on_going_duels: list = []
+        self.on_going_amongus: list = []
+        self.on_going_bigrat: list = []
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         if not self.conn:

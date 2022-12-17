@@ -130,3 +130,4 @@ dmypy.json
 
 /bot/database.db
 /bot/exts/debug.py
+.gitpod.yml
