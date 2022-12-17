@@ -3,6 +3,7 @@ from random import randint
 
 import discord as dc
 import discord.ui as ui
+import discord.ext.commands as cmds
 
 from bot.bot import _Bot
 from bot.constants import emojis
@@ -158,6 +159,7 @@ class RpsCommand(dc.Cog):
 
     @dc.command(name="rps")
     @dc.option("player", dc.Member)
+    @cmds.cooldown(1, 3, cmds.BucketType.member)
     async def rps_cmd(self, ctx: dc.ApplicationContext, player: dc.Member):
         if player == ctx.author or player.bot:
             return await ctx.respond("You can't play with yourself or a bot.", ephemeral=True)

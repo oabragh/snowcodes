@@ -3,6 +3,7 @@ from random import choice, randint
 
 import discord as dc
 import discord.ui as ui
+import discord.ext.commands as cmds
 
 from bot.bot import _Bot
 from bot.constants import emojis
@@ -250,6 +251,7 @@ class DuelCommand(dc.Cog):
 
     @dc.command(name="duel", guild_ids=[1041363391790465075, 1051567321535225896])
     @dc.option("player", dc.Member)
+    @cmds.cooldown(1, 5, cmds.BucketType.member)
     async def duel_cmd(self, ctx: dc.ApplicationContext, player: dc.Member):
         """Play a 1v1 battle!"""
         invite_embed = dc.Embed(

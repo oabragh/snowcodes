@@ -2,6 +2,7 @@ from random import choice, shuffle
 
 import discord as dc
 import discord.ui as ui
+import discord.ext.commands as cmds
 
 from bot.bot import _Bot
 from bot.constants import emojis
@@ -132,6 +133,7 @@ class AmongusCommand(dc.Cog):
         self.bot = bot
 
     @dc.command(name="among-us", guild_ids=[1041363391790465075, 1051567321535225896])
+    @cmds.cooldown(1, 7, cmds.BucketType.member)
     @dc.option(
         "impostors",
         description="Higher is harder but you get more rewards",

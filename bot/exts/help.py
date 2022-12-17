@@ -1,4 +1,6 @@
 from discord import ApplicationContext, Cog, Embed, File, command
+import discord.ext.commands as cmds
+import discord as dc
 
 from bot.bot import _Bot
 

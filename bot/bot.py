@@ -1,10 +1,11 @@
 """discord.Bot subclass file"""
 
 import aiosqlite
-from discord import Bot, Cog
+import discord as dc
+import discord.ext.commands as cmds
 
 
-class _Bot(Bot):
+class _Bot(dc.Bot):
     def __init__(self):
         super().__init__()
 
@@ -12,6 +13,15 @@ class _Bot(Bot):
         self.on_going_duels: list = []
         self.on_going_amongus: list = []
         self.on_going_bigrat: list = []
+        self.on_going_rps: list = []
+
+    async def on_application_command_error(self, ctx: dc.ApplicationContext, exception: dc.DiscordException):
+
+        if isinstance(exception, cmds.CommandOnCooldown):
+            await ctx.respond("Please don't spam bot commands!", ephemeral=True)
+        
+        else:
+            await ctx.respond("Some error occured! please try again later", ephemeral=True)
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         if not self.conn:
@@ -45,5 +55,5 @@ class _Bot(Bot):
             await self.conn.commit()
 
     @property
-    def db(self) -> Cog:
+    def db(self) -> dc.Cog:
         return self.get_cog("Database")

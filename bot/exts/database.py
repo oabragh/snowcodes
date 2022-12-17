@@ -1,7 +1,7 @@
-from discord import Cog
+import discord as dc
 
 
-class Database(Cog):
+class Database(dc.Cog):
     """Helper functions for querying the database"""
 
     def __init__(self, bot):

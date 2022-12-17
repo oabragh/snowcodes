@@ -2,6 +2,7 @@ from random import randint, shuffle
 
 import discord as dc
 import discord.ui as ui
+import discord.ext.commands as cmds
 
 from bot.bot import _Bot
 from bot.constants import emojis
@@ -94,6 +95,7 @@ class BigratCommand(dc.Cog):
         self.bot = bot
 
     @dc.command(name="bigrat", guild_ids=[1041363391790465075, 1051567321535225896])
+    @cmds.cooldown(1, 3, cmds.BucketType.member)
     async def bigrat_cmd(self, ctx: dc.ApplicationContext):
         """Play with bigrat :D"""
         view = Bigrat(player=ctx.author, bot=self.bot)
