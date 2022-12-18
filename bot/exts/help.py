@@ -26,7 +26,7 @@ class Help(dc.Cog):
         )
 
         help_embed = dc.Embed(
-            title="How to use the bot:",
+            title="What is this?",
             colour=0x2F3136,
             description=description,
             url="https://discord.gg/ggZn8PaQed",
