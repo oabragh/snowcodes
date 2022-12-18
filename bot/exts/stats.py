@@ -11,6 +11,7 @@ class StatsCommands(dc.Cog):
     @dc.command(name="leaderboard")
     @cmds.cooldown(1, 3, cmds.BucketType.member)
     async def lb_cmd(self, ctx: dc.ApplicationContext):
+        """Shows the top 10 players globally"""
         players = await self.bot.db.get_all_stats()
 
         if not players:  # If no players are stored

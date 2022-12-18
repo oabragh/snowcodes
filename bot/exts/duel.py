@@ -272,7 +272,7 @@ class DuelCommand(dc.Cog):
         self.bot = bot
 
     @dc.command(name="duel")
-    @dc.option("player", dc.Member)
+    @dc.option("player", dc.Member, description="Your best friend")
     @cmds.cooldown(1, 5, cmds.BucketType.member)
     async def duel_cmd(self, ctx: dc.ApplicationContext, player: dc.Member):
         """Play a 1v1 battle!"""
