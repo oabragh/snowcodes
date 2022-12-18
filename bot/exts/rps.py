@@ -17,10 +17,16 @@ class RPS(ui.View):
         self.bot: _Bot = bot
 
         # 1: rock, 2: paper, 3: scissors.
-        self.choices: t.Dict[dc.Member, int] = {players[0]: 0, players[1]: 0}
+        self.choices: t.Dict[dc.Member, int] = {
+            players[0]: 0,
+            players[1]: 0
+        }
 
         # to check if the player has played.
-        self.played: t.Dict[dc.Member, bool] = {players[0]: False, players[1]: False}
+        self.played: t.Dict[dc.Member, bool] = {
+            players[0]: False,
+            players[1]: False
+        }
 
     async def on_timeout(self):
         self.remove_session()
@@ -34,7 +40,7 @@ class RPS(ui.View):
 
     def remove_session(self):
         for i in self.players:
-            if i in self.bot.on_going_rps:
+            if i.id in self.bot.on_going_rps:
                 self.bot.on_going_rps.remove(i.id)
 
     def choice(self, player: dc.Member) -> str:
@@ -86,7 +92,8 @@ class RPS(ui.View):
 
             desc += f"{player.mention}: {has_played}\n"
 
-        embed = dc.Embed(title="RPS game started.", color=0x2F3136, description=desc)
+        embed = dc.Embed(title="RPS game started.",
+                         color=0x2F3136, description=desc)
 
         return embed
 
@@ -104,50 +111,10 @@ class RPS(ui.View):
         await inter.response.defer()
 
         if [i for i in self.played.values()] == [True, True]:
+            self.remove_session()
+
             self.disable_all_items()
             self.stop()
-
-            async def tie():
-                embed = dc.Embed(
-                    title="Game ended with a tie!",
-                    description=f"You both chose {self.choice(inter.user)}",
-                    color=0x2F3136,
-                )
-                embed.set_image(url="attachment://red-line.jpg")
-                await self.message.edit(
-                    content=None,
-                    view=None,
-                    embed=embed,
-                    file=dc.File("bot/assets/red-line.jpg"),
-                )
-
-            async def win(result):
-                winner, loser = result
-
-                winner_xp = randint(500, 1000)
-                loser_xp = 50
-
-                # Update scores
-                await self.bot.db.update_user_score(winner.id, winner_xp)
-                await self.bot.db.update_user_score(loser.id, -loser_xp)
-
-                score = f"{emojis['plus']} {winner_xp}xp: {winner.mention} ({self.choice(winner)})\
-                        \n{emojis['minus']} {loser_xp}xp: {loser.mention} ({self.choice(loser)})"
-
-                embed = dc.Embed(
-                    title="Game ended.",
-                    description=f"{winner.mention} won the game!",
-                    color=0x2F3136,
-                )
-                embed.set_image(url="attachment://green-line.jpg")
-                embed.add_field(name="Score:", value=score)
-
-                await self.message.edit(
-                    content=None,
-                    view=None,
-                    embed=embed,
-                    file=dc.File("bot/assets/green-line.jpg"),
-                )
 
             if self.winner() == 0:
                 await tie()
@@ -155,9 +122,50 @@ class RPS(ui.View):
             else:
                 await win(self.winner())
 
-            self.remove_session()
         else:
             await self.message.edit(embed=self.game_embed)
+
+    async def tie():
+        embed = dc.Embed(
+            title="Game ended with a tie!",
+            description=f"You both chose {self.choice(inter.user)}",
+            color=0x2F3136,
+        )
+        embed.set_image(url="attachment://red-line.jpg")
+        await self.message.edit(
+            content=None,
+            view=None,
+            embed=embed,
+            file=dc.File("bot/assets/red-line.jpg"),
+        )
+
+    async def win(result):
+        winner, loser = result
+
+        winner_xp = randint(500, 1000)
+        loser_xp = 50
+
+        # Update scores
+        await self.bot.db.update_user_score(winner.id, winner_xp)
+        await self.bot.db.update_user_score(loser.id, -loser_xp)
+
+        score = f"{emojis['plus']} {winner_xp}xp: {winner.mention} ({self.choice(winner)})\
+                \n{emojis['minus']} {loser_xp}xp: {loser.mention} ({self.choice(loser)})"
+
+        embed = dc.Embed(
+            title="Game ended.",
+            description=f"{winner.mention} won the game!",
+            color=0x2F3136,
+        )
+        embed.set_image(url="attachment://green-line.jpg")
+        embed.add_field(name="Score:", value=score)
+
+        await self.message.edit(
+            content=None,
+            view=None,
+            embed=embed,
+            file=dc.File("bot/assets/green-line.jpg"),
+        )
 
     @ui.button(label="Rock", emoji=emojis["rock"], style=dc.ButtonStyle.primary)
     async def rock(self, button: ui.Button, interaction: dc.Interaction):
