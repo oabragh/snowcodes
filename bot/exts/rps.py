@@ -211,7 +211,7 @@ class RpsCommand(dc.Cog):
 
         if playing:
             players = " and ".join(playing)
-            return await inter.response.send_message(
+            return await ctx.respond(
                 f"{players} already have an ongoing `rps` game...", ephemeral=True
             )
 
