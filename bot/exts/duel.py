@@ -13,14 +13,15 @@ class Duel(ui.View):
     action = None
 
     def __init__(self, players: t.List[dc.Member], bot: _Bot):
-        super().__init__(timeout=60, disable_on_timeout=True)
+        super().__init__(timeout=90)
 
         self.bot: _Bot = bot
 
         self.players = players
         self.current_player: dc.Member = choice(self.players)
         self.next_player: dc.Member = [
-            i for i in self.players if not i == self.current_player][0]
+            i for i in self.players if not i == self.current_player
+        ][0]
 
         self.stats = {
             self.players[0]: {
@@ -35,6 +36,16 @@ class Duel(ui.View):
             },
         }
 
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+
+        await self.message.edit(embed=dc.Embed(title="Duel timed out.", color=0x2F3136))
+
+        for i in self.players:
+            if i in self.bot.on_going_duels:
+                self.bot.on_going_duels.remove(i.id)
+
     @property
     def game_embed(self):
         """Returns the game embed."""
@@ -43,19 +54,19 @@ class Duel(ui.View):
         for i in self.stats.values():  # Add a field for each player
             player_health = f"Health: {i['health']}/100 :heart:"
             player_shield = f"Shield: {i['shield']}/100 :shield:"
-            embed.add_field(
-                name=i["name"], value=f"{player_health}\n{player_shield}")
+            embed.add_field(name=i["name"], value=f"{player_health}\n{player_shield}")
 
-        if not self.action:  # If no action exist, its most likely the battle just started.
+        if (
+            not self.action
+        ):  # If no action exist, its most likely the battle just started.
             self.action = "Battle started!"
 
-        embed.add_field(name="Last Action",
-                        value=f"`{self.action}`", inline=False)
+        embed.add_field(name="Last Action", value=f"`{self.action}`", inline=False)
 
         return embed
 
     def swap(self):
-        """Swaps play turns after """
+        """Swaps play turns after"""
         self.current_player, self.next_player = self.next_player, self.current_player
 
     def stop(self):
@@ -94,7 +105,9 @@ class Duel(ui.View):
         await self.bot.db.update_user_score(winner.id, winner_xp)
         await self.bot.db.update_user_score(loser.id, -loser_xp)
 
-        result = f"{self.current_player.mention} won {self.next_player.mention}! :muscle:"
+        result = (
+            f"{self.current_player.mention} won {self.next_player.mention}! :muscle:"
+        )
 
         win_embed = dc.Embed(title="Duel finished.", description=result, color=0x2F3136)
         win_embed.set_image(url="attachment://green-line.jpg")
@@ -190,12 +203,19 @@ class Duel(ui.View):
 
 class DuelInvite(ui.View):
     def __init__(self, player: dc.Member, author: dc.Member, bot):
-        super().__init__(timeout=60, disable_on_timeout=True)
+        super().__init__(timeout=90)
 
         self.bot = bot
         self.author = author
         self.player = player
 
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+
+        await self.message.edit(
+            embed=dc.Embed(title="Duel timed out.", color=0x2F3136), view=self
+        )
 
     @ui.button(label="Accept", style=dc.ButtonStyle.success)
     async def accept(self, button: ui.Button, interaction: dc.Interaction):
@@ -232,8 +252,10 @@ class DuelInvite(ui.View):
 
         if playing:
             players = " and ".join(playing)
-            return await inter.response.send_message(f"{players} already have an ongoing duel...", ephemeral=True)
-        
+            return await inter.response.send_message(
+                f"{players} already have an ongoing `duel` game...", ephemeral=True
+            )
+
         self.bot.on_going_duels.extend([self.author.id, inter.user.id])
 
         view = Duel(players=[self.author, self.player], bot=self.bot)
@@ -254,6 +276,10 @@ class DuelCommand(dc.Cog):
     @cmds.cooldown(1, 5, cmds.BucketType.member)
     async def duel_cmd(self, ctx: dc.ApplicationContext, player: dc.Member):
         """Play a 1v1 battle!"""
+        if ctx.author == player or player.bot:
+            return await ctx.respond(
+                "You can't play with yourself or with a bot...", ephemeral=True
+            )
         invite_embed = dc.Embed(
             title="Do you accept challenge?",
             description=f"{ctx.author.mention} invited you to a duel!",

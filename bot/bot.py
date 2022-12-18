@@ -7,7 +7,9 @@ import discord.ext.commands as cmds
 
 class _Bot(dc.Bot):
     def __init__(self):
-        super().__init__()
+        intents = dc.Intents.default()
+        intents.members = True
+        super().__init__(intents=intents)
 
         self.conn: aiosqlite.Connection = None
         self.on_going_duels: list = []
@@ -15,13 +17,21 @@ class _Bot(dc.Bot):
         self.on_going_bigrat: list = []
         self.on_going_rps: list = []
 
-    async def on_application_command_error(self, ctx: dc.ApplicationContext, exception: dc.DiscordException):
+    async def on_application_command_error(
+        self, ctx: dc.ApplicationContext, exception: dc.DiscordException
+    ):
+        if ctx.command.has_error_handler():
+            return
 
         if isinstance(exception, cmds.CommandOnCooldown):
             await ctx.respond("Please don't spam bot commands!", ephemeral=True)
-        
+
         else:
-            await ctx.respond("Some error occured! please try again later", ephemeral=True)
+            await ctx.respond(
+                "Some error occured! please try again later", ephemeral=True
+            )
+
+            raise exception
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         if not self.conn:
@@ -37,6 +47,7 @@ class _Bot(dc.Bot):
 
     async def on_ready(self) -> None:
         await self.setup_database()
+        self.get_user
 
     async def setup_database(self) -> None:
         queries = [

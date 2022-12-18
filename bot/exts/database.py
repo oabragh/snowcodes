@@ -7,7 +7,7 @@ class Database(dc.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def create_user_stats(self, id: int, score: int = 0):
+    async def create_user(self, id: int, score: int = 0):
         """Add player to database"""
         async with self.bot.conn.cursor() as cur:
             query = "INSERT INTO players (id, score) VALUES (?, ?)"
@@ -24,7 +24,16 @@ class Database(dc.Cog):
             result = await cur.fetchone()
 
             if not result:
-                result = await self.create_user_stats(id)
+                result = await self.create_user(id)
+
+        return result
+
+    async def get_all_stats(self):
+        async with self.bot.conn.cursor() as cur:
+            query = "SELECT * FROM players"
+            await cur.execute(query)
+
+            result = await cur.fetchall()
 
         return result
 

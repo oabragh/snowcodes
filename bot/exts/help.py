@@ -13,25 +13,23 @@ class Help(Cog):
     async def help_cmd(self, ctx: ApplicationContext):
         """Shows you how to use the bot"""
         desc = (
-            "`/among-us` Among us mini-game :D\n"
-            "`/balance` Check your balance!\n"
-            "`/bigrat` Play with bigrat\n"
-            "`/deposit` Deposit to your vault\n"
-            "`/pay` Send money from your wallet.\n"
-            "`/withdraw` Withdraw from your vault\n"
+            "`/among-us` Among us based mini-game\n"
+            "`/bigrat` Play a game with bigrat :D\n"
+            "`/duel` Challenge your friend with a duel!\n"
+            "`/rps` Rock Paper Scissors\n"
+            "`/leaderboard` Shows the top 10 players globally\n"
         )
 
         help_embed = Embed(
-            title="Santa's commands:",
+            title="Bot's commands:",
             description=desc,
             colour=0x2F3136,
             url="https://discord.gg/ggZn8PaQed",
         )
 
-        help_embed.set_thumbnail(url="attachment://question.png")
-        help_embed.set_footer(text="merry christmas :)")
+        help_embed.set_footer(text="Merry christmas :)")
 
-        await ctx.respond(embed=help_embed, file=File("bot/assets/question.png"))
+        await ctx.respond(embed=help_embed)
 
 
 def setup(bot: _Bot):

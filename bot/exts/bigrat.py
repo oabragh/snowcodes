@@ -44,13 +44,28 @@ class BoxButton(ui.Button):
 
 class Bigrat(ui.View):
     def __init__(self, *, player: dc.User, bot):
-        super().__init__(timeout=30, disable_on_timeout=True)
+        super().__init__(timeout=90)
 
         self.bot = bot
         self.player = player
 
+    def remove_session(self):
+        if self.player.id in self.bot.on_going_bigrat:
+            self.bot.on_going_bigrat.remove(self.player.id)
+
+    async def on_timeout(self):
+        self.remove_session()
+
+        for child in self.children:
+            child.disabled = True
+
+        await self.message.edit(
+            view=self, embed=dc.Embed(title="Timed out.", color=0x2F3136)
+        )
+
     async def lost(self):
         """Called when the player chose the wrong button"""
+        self.remove_session()
 
         chance = randint(1, 5)
 
@@ -74,6 +89,8 @@ class Bigrat(ui.View):
 
     async def won(self):
         """Called when the player clicks the right button"""
+        self.remove_session()
+
         score = randint(400, 500)
         score_msg = f"You earned {score}xp winning!"
 
@@ -98,6 +115,12 @@ class BigratCommand(dc.Cog):
     @cmds.cooldown(1, 3, cmds.BucketType.member)
     async def bigrat_cmd(self, ctx: dc.ApplicationContext):
         """Play with bigrat :D"""
+        if ctx.author.id in self.bot.on_going_bigrat:
+            return await ctx.respond(
+                "You already have an on going `bigrat` game...", ephemeral=True
+            )
+        self.bot.on_going_bigrat.append(ctx.author.id)
+
         view = Bigrat(player=ctx.author, bot=self.bot)
 
         buttons = [BoxButton() for _ in range(3)]

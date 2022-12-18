@@ -47,14 +47,47 @@ class Amongus(ui.View):
     _win_bonus = 0  # you get this when you win, default to 0
 
     def __init__(self, *, player: dc.User, bot: _Bot, impostors: int):
-        super().__init__(timeout=30, disable_on_timeout=True)
+        super().__init__(timeout=90)
 
         self.bot: _Bot = bot
         self.player = player
         self.impostors = impostors
 
+    def remove_session(self):
+        if self.player.id in self.bot.on_going_amongus:
+            self.bot.on_going_amongus.remove(self.player.id)
+
+    async def on_timeout(self):
+        self.remove_session()
+
+        for child in self.children:
+            child.disabled = True
+
+        await self.bot.db.update_user_score(self.player.id, self.reward - 250)
+
+        if not self.message:
+            return
+
+        impostors = " ".join([str(b.emoji) for b in self.children if b.impostor])
+        lose_embed = dc.Embed(
+            title="You took too long to respond, you lost!", color=0x2F3136
+        )
+        lose_embed.add_field(name="Score", value=self._score)
+        lose_embed.add_field(name="XP", value=f"{self.reward-250}xp")
+        lose_embed.add_field(name="Impostors", value=impostors)
+        lose_embed.set_image(url="attachment://red-line.jpg")
+
+        await self.message.edit(
+            content=None,
+            embed=lose_embed,
+            view=None,
+            file=dc.File("bot/assets/red-line.jpg"),
+        )
+
     async def lost(self):
         """Called when pressing an impostor button"""
+
+        self.remove_session()
 
         # Update the user's score.
         await self.bot.db.update_user_score(self.player.id, self.reward - 250)
@@ -68,8 +101,7 @@ class Amongus(ui.View):
 
         # Send embed
 
-        impostors = " ".join([str(b.emoji)
-                             for b in self.children if b.impostor])
+        impostors = " ".join([str(b.emoji) for b in self.children if b.impostor])
         lose_embed = dc.Embed(title="You lost!", color=0x2F3136)
         lose_embed.add_field(name="Score", value=self._score)
         lose_embed.add_field(name="XP", value=f"{self.reward-250}xp")
@@ -85,6 +117,8 @@ class Amongus(ui.View):
 
     async def update(self):
         """Update the message with the current score"""
+        self.remove_session()
+
         self._score += 1
 
         if self._score == 10 - self.impostors:  # If every crewmate button is clicked
@@ -133,7 +167,7 @@ class AmongusCommand(dc.Cog):
         self.bot = bot
 
     @dc.command(name="among-us", guild_ids=[1041363391790465075, 1051567321535225896])
-    @cmds.cooldown(1, 7, cmds.BucketType.member)
+    @cmds.cooldown(1, 15, cmds.BucketType.member)
     @dc.option(
         "impostors",
         description="Higher is harder but you get more rewards",
@@ -141,6 +175,13 @@ class AmongusCommand(dc.Cog):
     )
     async def amongus_cmd(self, ctx: dc.ApplicationContext, impostors: int):
         """Play Among us based mini-game."""
+
+        if ctx.author.id in self.bot.on_going_amongus:
+            return await ctx.respond(
+                "You already have an on going `among-us` game...", ephemeral=True
+            )
+
+        self.bot.on_going_amongus.append(ctx.author.id)
 
         view = Amongus(player=ctx.author, bot=self.bot, impostors=impostors)
 
@@ -166,6 +207,18 @@ class AmongusCommand(dc.Cog):
             view.add_item(i)
 
         await ctx.respond(view.msg, view=view)
+
+    @amongus_cmd.error
+    async def amongus_error(
+        self, ctx: dc.ApplicationContext, error: dc.DiscordException
+    ):
+        if isinstance(error, cmds.CommandOnCooldown):
+            return await ctx.respond(
+                f"You can play again in `{int(error.retry_after)}s`", ephemeral=True
+            )
+
+        else:
+            raise error
 
 
 def setup(bot: _Bot):
