@@ -9,7 +9,9 @@ class _Bot(dc.Bot):
     def __init__(self):
         intents = dc.Intents.default()
         intents.members = True
-        super().__init__(intents=intents)
+        activity = dc.Activity(type=dc.ActivityType.watching, name="You")
+
+        super().__init__(intents=intents, activity=activity)
 
         self.conn: aiosqlite.Connection = None
         self.on_going_duels: list = []

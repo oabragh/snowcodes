@@ -202,11 +202,11 @@ class RpsCommand(dc.Cog):
 
         playing = []
 
-        if self.author.id in self.bot.on_going_rps:
+        if ctx.author.id in self.bot.on_going_rps:
             playing.append("You")
 
         if player.id in self.bot.on_going_rps:
-            playing.append(self.author.mention)
+            playing.append(player.mention)
 
         if playing:
             players = " and ".join(playing)
@@ -214,7 +214,7 @@ class RpsCommand(dc.Cog):
                 f"{players} already have an ongoing `rps` game...", ephemeral=True
             )
 
-        self.bot.on_going_rps.extend([self.author.id, inter.user.id])
+        self.bot.on_going_rps.extend([ctx.author.id, player.id])
 
         view = RPS(players=[ctx.author, player], bot=self.bot)
 

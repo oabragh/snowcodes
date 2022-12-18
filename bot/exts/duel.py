@@ -271,7 +271,7 @@ class DuelCommand(dc.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @dc.command(name="duel", guild_ids=[1041363391790465075, 1051567321535225896])
+    @dc.command(name="duel")
     @dc.option("player", dc.Member)
     @cmds.cooldown(1, 5, cmds.BucketType.member)
     async def duel_cmd(self, ctx: dc.ApplicationContext, player: dc.Member):

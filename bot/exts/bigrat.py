@@ -111,7 +111,7 @@ class BigratCommand(dc.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @dc.command(name="bigrat", guild_ids=[1041363391790465075, 1051567321535225896])
+    @dc.command(name="bigrat")
     @cmds.cooldown(1, 3, cmds.BucketType.member)
     async def bigrat_cmd(self, ctx: dc.ApplicationContext):
         """Play with bigrat :D"""

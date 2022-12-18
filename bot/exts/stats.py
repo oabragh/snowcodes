@@ -8,9 +8,7 @@ class StatsCommands(dc.Cog):
     def __init__(self, bot: _Bot) -> None:
         self.bot = bot
 
-    @dc.command(
-        name="leaderboard", guild_ids=[1041363391790465075, 1051567321535225896]
-    )
+    @dc.command(name="leaderboard")
     @cmds.cooldown(1, 3, cmds.BucketType.member)
     async def lb_cmd(self, ctx: dc.ApplicationContext):
         players = await self.bot.db.get_all_stats()
@@ -32,7 +30,8 @@ class StatsCommands(dc.Cog):
             desc += f"{idx+1}. {self.bot.get_user(int(i[0])).mention}: `{i[1]}xp`\n"
 
         embed = dc.Embed(title="Leaderboard", description=desc, color=0x2F3136)
-        await ctx.respond(embed=embed)
+        embed.set_thumbnail(url="attachment://podium.png")
+        await ctx.respond(embed=embed, file=dc.File("bot/assets/podium.png"))
 
 
 def setup(bot: _Bot):

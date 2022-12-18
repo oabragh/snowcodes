@@ -166,7 +166,7 @@ class AmongusCommand(dc.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @dc.command(name="among-us", guild_ids=[1041363391790465075, 1051567321535225896])
+    @dc.command(name="among-us")
     @cmds.cooldown(1, 15, cmds.BucketType.member)
     @dc.option(
         "impostors",
