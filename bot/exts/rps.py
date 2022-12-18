@@ -117,18 +117,18 @@ class RPS(ui.View):
             self.stop()
 
             if self.winner() == 0:
-                await tie()
+                await self.tie()
 
             else:
-                await win(self.winner())
+                await self.win(self.winner())
 
         else:
             await self.message.edit(embed=self.game_embed)
 
-    async def tie():
+    async def tie(self):
         embed = dc.Embed(
             title="Game ended with a tie!",
-            description=f"You both chose {self.choice(inter.user)}",
+            description=f"You both chose {self.choice(self.players[0])}",
             color=0x2F3136,
         )
         embed.set_image(url="attachment://red-line.jpg")
@@ -139,7 +139,7 @@ class RPS(ui.View):
             file=dc.File("bot/assets/red-line.jpg"),
         )
 
-    async def win(result):
+    async def win(self, result):
         winner, loser = result
 
         winner_xp = randint(500, 1000)
