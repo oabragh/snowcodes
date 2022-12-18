@@ -53,6 +53,9 @@ class Bigrat(ui.View):
         if self.player.id in self.bot.on_going_bigrat:
             self.bot.on_going_bigrat.remove(self.player.id)
 
+        self.disable_all_items()
+        self.stop()
+
     async def on_timeout(self):
         self.remove_session()
 
@@ -67,23 +70,15 @@ class Bigrat(ui.View):
         """Called when the player chose the wrong button"""
         self.remove_session()
 
-        chance = randint(1, 5)
+        score = 75
+        score_msg = f"{emojis['minus']} {score}xp"
+
+        await self.bot.db.update_user_score(self.player.id, -score)
 
         bigrat_img = dc.File("bot/assets/bigrat.png")
 
-        lose_embed = dc.Embed(title="You lost!", color=0x2F3136)
+        lose_embed = dc.Embed(title="You lost :-(", color=0x2F3136)
         lose_embed.set_image(url="attachment://bigrat.png")
-
-        if chance == 3:
-            score = randint(1000, 1500)
-
-            lose_embed.description = (
-                f"Oh, you still get {score}xp because bigrat enjoyed!"
-            )
-            await self.bot.db.update_user_score(self.player.id, score)
-
-        self.disable_all_items()
-        self.stop()
 
         await self.message.edit(embed=lose_embed, view=self, file=bigrat_img)
 
@@ -92,17 +87,14 @@ class Bigrat(ui.View):
         self.remove_session()
 
         score = randint(400, 500)
-        score_msg = f"You earned {score}xp winning!"
+        score_msg = f"{emojis['plus']} {score}xp"
 
         await self.bot.db.update_user_score(self.player.id, score)
 
         hat_bigrat_img = dc.File("bot/assets/bigrat-christmas-hat.png")
 
-        win_embed = dc.Embed(title="You won!", description=score_msg, color=0x2F3136)
+        win_embed = dc.Embed(title="You guessed right!", description=score_msg, color=0x2F3136)
         win_embed.set_image(url="attachment://bigrat-christmas-hat.png")
-
-        self.disable_all_items()
-        self.stop()
 
         return await self.message.edit(embed=win_embed, view=self, file=hat_bigrat_img)
 
