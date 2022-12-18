@@ -24,14 +24,22 @@ class StatsCommands(dc.Cog):
         if len(players) > 10:
             players = players[:9]
 
-        desc = ""
+        players = {
+            self.bot.get_user(int(p[0])).mention: p[1]
+            for p in players
+        }
 
-        # For each player, add them in description
-        for idx, i in enumerate(players):
-            desc += f"{idx+1}. {self.bot.get_user(int(i[0])).mention}: `{i[1]}xp`\n"
+        ranks_column = "\n".join(str(i+1) for i in range(len(players)))
+        players_column = "\n".join(i for i in players.keys())
+        xp_column = "\n".join(str(i) for i in players.values())
 
-        embed = dc.Embed(title="Leaderboard", description=desc, color=0x2F3136)
+        embed = dc.Embed(title="Leaderboard", color=0x2F3136)
         embed.set_thumbnail(url="attachment://podium.png")
+
+        embed.add_field(name="Rank", value=ranks_column)
+        embed.add_field(name="Player", value=players_column)
+        embed.add_field(name="XP", value=xp_column)
+
         await ctx.respond(embed=embed, file=dc.File("bot/assets/podium.png"))
 
 
