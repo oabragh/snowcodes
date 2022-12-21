@@ -117,11 +117,11 @@ class Amongus(ui.View):
 
     async def update(self):
         """Update the message with the current score"""
-        self.remove_session()
 
         self._score += 1
 
         if self._score == 10 - self.impostors:  # If every crewmate button is clicked
+            self.remove_session()
             self._win_bonus = 1000
 
             # Update the user's score.
