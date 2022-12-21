@@ -76,8 +76,9 @@ class Bigrat(ui.View):
         await self.bot.db.update_user_score(self.player.id, -score)
 
         lose_embed = dc.Embed(title="You lost :-(", description=score_msg, color=0x2F3136)
+        lose_embed.set_image(url="attachment://bigrat.png")
 
-        await self.message.edit(embed=lose_embed, view=self, file=None)
+        await self.message.edit(embed=lose_embed, view=self)
 
     async def won(self):
         """Called when the player clicks the right button"""
